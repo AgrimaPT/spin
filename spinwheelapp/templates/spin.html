@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Spin the Wheel</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            text-align: center;
+            padding-top: 50px;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        h1 {
+            color: #4a4a4a;
+            font-size: 2.5rem;
+            margin-bottom: 30px;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+        }
+
+        #wheel-container {
+            position: relative;
+            width: 400px;
+            height: 400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        #wheel {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            transition: transform 4s cubic-bezier(0.17, 0.67, 0.12, 0.99);
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2), 
+                        0 0 0 10px rgba(255, 255, 255, 0.8),
+                        0 0 0 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .segment-label {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform-origin: center;
+            transform: rotate(var(--angle)) translateY(-140px);
+            writing-mode: vertical-rl;
+            text-orientation: mixed;
+            font-size: 14px;
+            font-weight: bold;
+            color: white;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
+            pointer-events: none;
+            max-height: 100px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .segment-label.selected {
+            color: #fff;
+            text-shadow: 0 0 8px rgba(255, 255, 0, 0.8), 0 0 15px rgba(255, 215, 0, 0.6);
+            font-size: 16px;
+            font-weight: 900;
+        }
+
+        #pointer {
+            position: absolute;
+            top: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 40px;
+            height: 40px;
+            background: #ff4757;
+            clip-path: polygon(50% 100%, 0% 0%, 100% 0%);
+            z-index: 10;
+            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.3));
+        }
+
+        #pointer:before {
+            content: '';
+            position: absolute;
+            width: 15px;
+            height: 15px;
+            background: #ff4757;
+            border-radius: 50%;
+            bottom: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        #center-circle {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            background: white;
+            border-radius: 50%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 5;
+            box-shadow: 0 0 10px rgba(0,0,0,0.2);
+            border: 5px solid rgba(255,255,255,0.8);
+        }
+
+        #spin-button {
+            margin-top: 40px;
+            padding: 15px 40px;
+            font-size: 18px;
+            background: linear-gradient(to right, #ff8a00, #da1b60);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(218, 27, 96, 0.4);
+            transition: all 0.3s ease;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+
+        #spin-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(218, 27, 96, 0.6);
+        }
+
+        #spin-button:active {
+            transform: translateY(1px);
+        }
+
+        #modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.7);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        #modal-content {
+            position: relative;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 50px 60px 40px;
+            border-radius: 15px;
+            text-align: center;
+            font-size: 24px;
+            color: white;
+            animation: fadeIn 0.4s ease-out;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.3);
+            border: 2px solid rgba(255,255,255,0.2);
+            max-width: 80%;
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .close-modal:hover {
+            background: rgba(255,255,255,0.3);
+            transform: rotate(90deg);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px) scale(0.95); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        .confetti-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 999;
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+</head>
+<body>
+    <h1>🎁 Spin to Win Amazing Prizes!</h1>
+
+    <div id="wheel-container">
+        <div id="pointer"></div>
+        <div id="wheel">
+            {% for segment in segments %}
+                <div class="segment-label" style="--angle: {{ segment.text_angle }}deg;">
+                    {{ segment.name }}
+                </div>
+            {% endfor %}
+            <div id="center-circle"></div>
+        </div>
+    </div>
+
+    <form method="post">
+        {% csrf_token %}
+        <button id="spin-button" type="button">SPIN THE WHEEL</button>
+    </form>
+
+    <!-- Audio elements preloaded -->
+    <audio id="win-sound" src="https://assets.mixkit.co/sfx/preview/mixkit-achievement-bell-600.mp3" preload="auto"></audio>
+    <audio id="spin-sound" src="https://assets.mixkit.co/sfx/preview/mixkit-slot-machine-spin-1930.mp3" preload="auto"></audio>
+    <audio id="win-modal-sound" src="https://assets.mixkit.co/sfx/preview/mixkit-winning-chimes-2015.mp3" preload="auto"></audio>
+
+    <div id="modal">
+        <div id="modal-content">
+            <button class="close-modal" aria-label="Close">×</button>
+            🎉 Congratulations! You won: <span id="winning-offer-name"></span>!
+            <div style="margin-top: 20px;">
+                <button id="claim-button" style="padding: 10px 25px; background: white; border: none; border-radius: 50px; font-weight: bold; cursor: pointer;">Claim Prize</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const wheel = document.getElementById('wheel');
+        const spinButton = document.getElementById('spin-button');
+        const segments = {{ segments|safe }};
+        const total = segments.length;
+        const anglePerSegment = 360 / total;
+        let isSpinning = false;
+        let confettiInterval;
+
+        const winSound = document.getElementById('win-sound');
+        const spinSound = document.getElementById('spin-sound');
+        const winModalSound = document.getElementById('win-modal-sound');
+        const modal = document.getElementById('modal');
+        const modalText = document.getElementById('winning-offer-name');
+        const closeModalBtn = document.querySelector('.close-modal');
+        const claimButton = document.getElementById('claim-button');
+
+        // Set wheel background with a subtle white border effect
+        let gradientParts = segments.map((seg, i) => {
+            const start = i * anglePerSegment;
+            const end = start + anglePerSegment;
+            return `${seg.color} ${start}deg ${end}deg`;
+        });
+        wheel.style.background = `conic-gradient(${gradientParts.join(', ')})`;
+
+        function weightedRandom(segments) {
+            const totalWeight = segments.reduce((sum, seg) => sum + seg.percentage, 0);
+            let rand = Math.random() * totalWeight;
+            for (let i = 0; i < segments.length; i++) {
+                rand -= segments[i].percentage;
+                if (rand <= 0) return i;
+            }
+            return segments.length - 1;
+        }
+
+        function closeModal() {
+            modal.style.display = 'none';
+            clearInterval(confettiInterval);
+            document.querySelectorAll('.segment-label').forEach(el => {
+                el.classList.remove('selected');
+            });
+            
+            // Submit the form after closing modal
+            const form = document.querySelector('form');
+            form.submit();
+        }
+
+        closeModalBtn.addEventListener('click', closeModal);
+        claimButton.addEventListener('click', closeModal);
+
+        spinButton.addEventListener('click', function(e) {
+            if (isSpinning) return;
+            isSpinning = true;
+            e.preventDefault();
+
+            const chosenIndex = weightedRandom(segments);
+            const spins = 5;
+            const rotateTo = spins * 360 + (chosenIndex * anglePerSegment) + (anglePerSegment / 2);
+            wheel.style.transition = 'transform 4s cubic-bezier(0.17, 0.67, 0.12, 0.99)';
+            wheel.style.transform = `rotate(-${rotateTo}deg)`;
+
+            // Play spinning sound effect
+            spinSound.currentTime = 0;
+            spinSound.volume = 0.4;
+            spinSound.play();
+
+            setTimeout(() => {
+                // Highlight the selected segment
+                document.querySelectorAll('.segment-label').forEach((el, i) => {
+                    el.classList.toggle('selected', i === chosenIndex);
+                });
+
+                // Play winning sound
+                spinSound.pause();
+                winSound.currentTime = 0;
+                winSound.volume = 0.6;
+                winSound.play();
+
+                // Confetti with multiple bursts
+                confettiInterval = setInterval(() => {
+                    confetti({
+                        particleCount: 100,
+                        spread: 70,
+                        origin: { y: 0.6 }
+                    });
+                }, 300);
+
+                // Show modal with the prize and play modal sound
+                modalText.textContent = segments[chosenIndex].name;
+                modal.style.display = 'flex';
+                winModalSound.currentTime = 0;
+                winModalSound.volume = 0.5;
+                winModalSound.play();
+
+                // Add hidden input with the selected offer
+                const form = this.closest('form');
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = 'selected_offer';
+                input.value = segments[chosenIndex].id;
+                form.appendChild(input);
+
+            }, 4100);
+            
+            // Reset spinning state after animation completes
+            setTimeout(() => {
+                isSpinning = false;
+            }, 5000);
+        });
+    </script>
+</body>
+</html>
