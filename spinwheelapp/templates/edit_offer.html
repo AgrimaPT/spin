@@ -4,29 +4,57 @@
     <meta charset="UTF-8">
     <title>Edit Offer</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .percentage-help {
+            font-size: 0.9rem;
+            color: #6c757d;
+            margin-top: 0.25rem;
+        }
+        .max-help {
+            color: #dc3545;
+            font-weight: bold;
+        }
+    </style>
 </head>
 <body>
 <div class="container mt-4">
     <h2>Edit Offer</h2>
+    
     {% if messages %}
         {% for message in messages %}
             <div class="alert alert-danger">{{ message }}</div>
         {% endfor %}
     {% endif %}
+    
     <form method="post">
         {% csrf_token %}
         <div class="mb-3">
             <label class="form-label">Name</label>
             <input type="text" class="form-control" name="name" value="{{ offer.name }}" required>
         </div>
+        
         <div class="mb-3">
             <label class="form-label">Color</label>
             <input type="color" class="form-control form-control-color" name="color" value="{{ offer.color }}">
         </div>
+        
         <div class="mb-3">
             <label class="form-label">Percentage Probability</label>
-            <input type="number" class="form-control" name="percentage" value="{{ offer.percentage }}" min="0" max="100" step="0.01" required>
+            <input type="number" 
+                   class="form-control" 
+                   name="percentage" 
+                   value="{{ offer.percentage }}" 
+                   min="0" 
+                   max="{{ max_allowed|floatformat:2 }}" 
+                   step="0.01" 
+                   required>
+            <div class="percentage-help">
+                Current total without this offer: {{ current_total|floatformat:2 }}%
+                <br>
+                <span class="max-help">Maximum allowed for this offer: {{ max_allowed|floatformat:2 }}%</span>
+            </div>
         </div>
+        
         <button type="submit" class="btn btn-primary">Update Offer</button>
         <a href="{% url 'offer_list' %}" class="btn btn-secondary">Cancel</a>
     </form>

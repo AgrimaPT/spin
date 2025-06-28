@@ -11,11 +11,18 @@ class ShopSignupForm(UserCreationForm):
         model = User
         fields = ('username', 'shop_name', 'password1', 'password2')
 
+# class SpinEntryForm(forms.Form):
+#     name = forms.CharField()
+#     phone = forms.CharField()
+#     shop_code = forms.CharField(label="Enter Shop Code")
+
 class SpinEntryForm(forms.Form):
     name = forms.CharField()
     phone = forms.CharField()
-    shop_code = forms.CharField(label="Enter Shop Code")
-
+    shop_code = forms.CharField(
+        widget=forms.HiddenInput()  # Make it hidden since we get it from QR
+    )
+    # bill_number = forms.CharField(required=False, label="Bill Number (Optional)")
 
 class ShopProfileForm(forms.ModelForm):
     class Meta:

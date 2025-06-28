@@ -133,6 +133,12 @@
                         
                         <div class="shop-code-display">
                             <i class="fas fa-qrcode me-2"></i>Shop Code: {{ form.instance.shop_code }}
+
+                            <p>Customers can scan this to access your spin wheel:</p>
+<img src="{{ qr_code_url }}" alt="QR Code for {{ shop.shop_name }}">
+<p>Direct URL: <a href="{{ qr_url }}" target="_blank">{{ qr_url }}</a></p>
+
+<p><small>Print this QR code or share the URL with your customers</small></p>
                         </div>
                         
                         <form method="post">

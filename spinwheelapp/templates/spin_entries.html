@@ -24,6 +24,25 @@
             margin-right: 5px;
             vertical-align: middle;
         }
+        .search-container {
+            position: relative;
+            margin-bottom: 20px;
+        }
+        .search-container i {
+            position: absolute;
+            left: 10px;
+            top: 10px;
+            color: #6c757d;
+        }
+        #searchInput {
+            padding-left: 35px;
+            border-radius: 20px;
+        }
+        .no-results {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
     </style>
 </head>
 <body>
@@ -47,11 +66,11 @@
             <i class="fas fa-store me-1"></i>Shop Profile
           </a>
         </li>
-        <li class="nav-item">
+        <!-- <li class="nav-item">
           <a class="nav-link" href="{% url 'spin_entries' %}">
             <i class="fas fa-history me-1"></i>Spin Entries
           </a>
-        </li>
+        </li> -->
         <li class="nav-item">
           <a class="nav-link" href="{% url 'logout' %}">
             <i class="fas fa-sign-out-alt me-1"></i>Logout
@@ -70,11 +89,17 @@
         </a>
     </div>
 
+    <!-- Search Bar -->
+    <div class="search-container mb-4">
+        <i class="fas fa-search"></i>
+        <input type="text" id="searchInput" class="form-control" placeholder="Search entries...">
+    </div>
+
     <div class="card shadow-sm">
         <div class="card-body p-0">
             {% if entries %}
             <div class="table-responsive">
-                <table class="table table-hover mb-0">
+                <table class="table table-hover mb-0" id="entriesTable">
                     <thead class="table-light">
                         <tr>
                             <th>Date & Time</th>
@@ -85,11 +110,11 @@
                     </thead>
                     <tbody>
                         {% for entry in entries %}
-                        <tr>
-                            <td>{{ entry.timestamp }}</td>
-                            <td>{{ entry.name }}</td>
-                            <td>{{ entry.phone }}</td>
-                            <td>
+                        <tr class="entry-row">
+                            <td class="searchable">{{ entry.timestamp }}</td>
+                            <td class="searchable">{{ entry.name }}</td>
+                            <td class="searchable">{{ entry.phone }}</td>
+                            <td class="searchable">
                                 <span class="offer-color" style="background-color:{{ entry.offer.color }}"></span>
                                 {{ entry.offer.name }}
                             </td>
@@ -97,6 +122,10 @@
                         {% endfor %}
                     </tbody>
                 </table>
+                <div id="noResults" class="no-results">
+                    <i class="fas fa-search fa-3x text-muted mb-3"></i>
+                    <p class="text-muted">No matching entries found. Try a different search term.</p>
+                </div>
             </div>
             {% else %}
             <div class="text-center py-4">
@@ -112,5 +141,42 @@
 <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
 <!-- Bootstrap JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- Search Functionality -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('searchInput');
+    const rows = document.querySelectorAll('.entry-row');
+    const noResults = document.getElementById('noResults');
+    
+    searchInput.addEventListener('keyup', function() {
+        const searchTerm = this.value.toLowerCase();
+        let hasResults = false;
+        
+        rows.forEach(row => {
+            const cells = row.querySelectorAll('.searchable');
+            let rowMatches = false;
+            
+            cells.forEach(cell => {
+                if (cell.textContent.toLowerCase().includes(searchTerm)) {
+                    rowMatches = true;
+                }
+            });
+            
+            if (rowMatches) {
+                row.style.display = '';
+                hasResults = true;
+            } else {
+                row.style.display = 'none';
+            }
+        });
+        
+        // Show/hide no results message
+        if (rows.length > 0) {
+            noResults.style.display = hasResults ? 'none' : 'block';
+        }
+    });
+});
+</script>
 </body>
 </html>

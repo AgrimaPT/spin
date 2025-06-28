@@ -38,6 +38,7 @@ class SpinEntry(models.Model):
     offer = models.ForeignKey(Offer, on_delete=models.CASCADE)
     shop = models.ForeignKey(ShopProfile, on_delete=models.CASCADE)
     timestamp = models.DateTimeField(auto_now_add=True)
+    bill_number = models.CharField(max_length=50, blank=True, null=True)
 
     def __str__(self):
         return f"{self.name} - {self.offer.name} ({self.timestamp.date()})"
@@ -52,6 +53,11 @@ class ShopSettings(models.Model):
             (0, 'Unlimited spins')
         ),
         help_text="Maximum spins allowed per mobile number per day"
+    )
+
+    require_bill_number = models.BooleanField(
+        default=False,
+        help_text="Enable to require bill number for spin entries"
     )
     
     def __str__(self):

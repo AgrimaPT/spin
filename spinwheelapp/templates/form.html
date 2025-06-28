@@ -10,13 +10,18 @@
             <div class="mb-3">
                 <label for="id_name" class="form-label">Name</label>
                 {{ form.name|add_class:"form-control" }}
+                {% if form.name.errors %}
+                    <div class="text-danger">{{ form.name.errors.0 }}</div>
+                {% endif %}
             </div>
             <div class="mb-3">
                 <label for="id_phone" class="form-label">Phone</label>
                 {{ form.phone|add_class:"form-control" }}
+                {% if form.phone.errors %}
+                    <div class="text-danger">{{ form.phone.errors.0 }}</div>
+                {% endif %}
             </div>
             <div class="mb-3">
-                <label for="id_shop_code" class="form-label">Shop Code</label>
                 {{ form.shop_code|add_class:"form-control" }}
                 {% if form.shop_code.errors %}
                     <div class="text-danger">{{ form.shop_code.errors.0 }}</div>
