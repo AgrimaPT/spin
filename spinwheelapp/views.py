@@ -77,9 +77,13 @@ def update_shop_profile(request):
         form = ShopProfileForm(instance=shop)
 
     # Generate QR code URL
-    qr_url = request.build_absolute_uri(
-        reverse('qr_entry_form', kwargs={'shop_code': shop.shop_code})
-    )
+    # qr_url = request.build_absolute_uri(
+    #     reverse('qr_entry_form', kwargs={'shop_code': shop.shop_code})
+    # )
+
+    host = 'http://13.60.179.206'  # Replace with domain if available
+    qr_url = f"{host}{reverse('qr_entry_form', kwargs={'shop_code': shop.shop_code})}"
+
     
     # You can use a QR code generation service or generate locally
     # Using QRServer API (simple solution)
