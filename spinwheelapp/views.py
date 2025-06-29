@@ -81,7 +81,7 @@ def update_shop_profile(request):
     #     reverse('qr_entry_form', kwargs={'shop_code': shop.shop_code})
     # )
 
-    host = 'http://13.60.179.206'  # Replace with domain if available
+    host = 'https://lucky.newintro.in'  # Replace with domain if available
     qr_url = f"{host}{reverse('qr_entry_form', kwargs={'shop_code': shop.shop_code})}"
 
     
