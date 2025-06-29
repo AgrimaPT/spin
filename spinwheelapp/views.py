@@ -766,3 +766,13 @@ def spin_entries(request):
     
     entries = SpinEntry.objects.filter(shop=shop).order_by('-timestamp')
     return render(request, 'spin_entries.html', {'entries': entries})
+
+# @login_required
+# def spin_entries(request, shop_code):
+#     try:
+#         shop = get_object_or_404(ShopProfile, code=shop_code)
+#     except ShopProfile.DoesNotExist:
+#         return redirect('offer_list')
+    
+#     entries = SpinEntry.objects.filter(shop=shop).order_by('-timestamp')
+#     return render(request, 'spin_entries.html', {'entries': entries})
