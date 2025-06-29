@@ -494,7 +494,7 @@ def spin_page(request):
     segments = build_segments(offers)
     angle_per_segment = 360 / len(segments)
 
-    print("Rendering spin page")  # Debug
+    #print("Rendering spin page")  # Debug
     return render(request, 'spin.html', {
         'segments': segments,
         'angle_per_segment': angle_per_segment,
