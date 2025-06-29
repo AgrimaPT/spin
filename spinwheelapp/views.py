@@ -469,8 +469,8 @@ def build_segments(offers):
 
 
 def spin_page(request):
-    print("Entering spin_page view")  # Debug
-    print("Session data:", request.session.get('entry_data'))  # Debug
+    # print("Entering spin_page view")  # Debug
+    # print("Session data:", request.session.get('entry_data'))  # Debug
     
     entry_data = request.session.get('entry_data')
     if not entry_data or not entry_data.get('verified'):
