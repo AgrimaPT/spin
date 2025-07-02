@@ -2,38 +2,106 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Settings</title>
+    <title>Settings - SpinWheel Admin</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
         :root {
             --primary: #4e73df;
+            --primary-dark: #2e59d9;
             --secondary: #f8f9fc;
-            --accent: #e74a3b;
+            --light: #f8f9fa;
             --dark: #5a5c69;
+            --gray: #d1d3e2;
+            --success: #1cc88a;
         }
         
         body {
-            background-color: #f8f9fa;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--light);
+            font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
         }
         
         .settings-card {
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border: none;
+            border-radius: 0.35rem;
+            box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+            overflow: hidden;
         }
         
-        .form-check-input:checked {
+        .card-header {
+            background-color: white;
+            border-bottom: 1px solid var(--gray);
+            padding: 1.25rem 1.5rem;
+        }
+        
+        .form-switch .form-check-input {
+            width: 3em;
+            height: 1.5em;
+            margin-left: -2.5em;
+        }
+        
+        .form-switch .form-check-input:checked {
             background-color: var(--primary);
             border-color: var(--primary);
+        }
+        
+        .form-control, .form-select {
+            padding: 0.5rem 0.75rem;
+            border-radius: 0.35rem;
+            border: 1px solid var(--gray);
+        }
+        
+        .form-control:focus, .form-select:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 0.2rem rgba(78, 115, 223, 0.25);
+        }
+        
+        .btn-primary {
+            background-color: var(--primary);
+            border-color: var(--primary);
+            padding: 0.5rem 1.5rem;
+        }
+        
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+            border-color: var(--primary-dark);
+        }
+        
+        .section-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--dark);
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid var(--gray);
+        }
+        
+        .setting-item {
+            padding: 1rem 0;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+        
+        .setting-item:last-child {
+            border-bottom: none;
+        }
+        
+        #socialFields {
+            background-color: rgba(78, 115, 223, 0.05);
+            border-radius: 0.35rem;
+            padding: 1.5rem;
+            margin-top: 1rem;
+            transition: all 0.3s ease;
         }
     </style>
 </head>
 <body>
 
-<!-- Navigation Bar (same as offers page) -->
-<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+<!-- Navigation Bar -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow">
   <div class="container-fluid">
-    <a class="navbar-brand" href="{% url 'offer_list' %}">🎡 SpinWheel Admin</a>
+    <a class="navbar-brand fw-bold" href="{% url 'offer_list' %}">
+        <i class="fas fa-circle-notch me-2"></i>SpinWheel Admin
+    </a>
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent"
             aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
@@ -62,79 +130,131 @@
   </div>
 </nav>
 
-<!-- Settings Content -->
-<div class="container mt-4">
+<!-- Main Content -->
+<div class="container py-5">
     <div class="row justify-content-center">
         <div class="col-lg-8">
-            <div class="card settings-card">
-                <div class="card-header bg-white border-bottom-0">
-                    <h4 class="mb-0"><i class="fas fa-cog me-2"></i>Settings</h4>
+            <div class="card settings-card mb-4">
+                <div class="card-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h4 class="mb-0"><i class="fas fa-cog me-2"></i>System Settings</h4>
+                        <a href="{% url 'offer_list' %}" class="btn btn-sm btn-outline-secondary">
+                            <i class="fas fa-arrow-left me-1"></i>Back to Offers
+                        </a>
+                    </div>
                 </div>
                 
                 <div class="card-body">
                     <form method="post">
                         {% csrf_token %}
                         
-                        <h5 class="mb-3"><i class="fas fa-mobile-alt me-2"></i>Spin Limits</h5>
+                        <!-- Spin Settings Section -->
+                        <h5 class="section-title">Spin Requirements</h5>
                         
-                        <div class="mb-4">
-                            <label class="form-label">Maximum spins per mobile number per day:</label>
-                            
-                            <div class="form-check mb-2">
-                                <input class="form-check-input" type="radio" name="spin_limit" id="spinLimit1" 
-                                       value="1" {% if spin_limit == 1 %}checked{% endif %}>
-                                <label class="form-check-label" for="spinLimit1">
-                                    1 spin per day
+                        <div class="setting-item">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="require_bill_number" 
+                                       name="require_bill_number" {% if settings.require_bill_number %}checked{% endif %}>
+                                <label class="form-check-label fw-medium" for="require_bill_number">
+                                    Require Bill Number for Spins
                                 </label>
-                            </div>
-                            
-                            <div class="form-check mb-2">
-                                <input class="form-check-input" type="radio" name="spin_limit" id="spinLimit2" 
-                                       value="2" {% if spin_limit == 2 %}checked{% endif %}>
-                                <label class="form-check-label" for="spinLimit2">
-                                    2 spins per day
-                                </label>
-                            </div>
-                            
-                            <div class="form-check">
-                                <input class="form-check-input" type="radio" name="spin_limit" id="spinLimitUnlimited" 
-                                       value="0" {% if spin_limit == 0 %}checked{% endif %}>
-                                <label class="form-check-label" for="spinLimitUnlimited">
-                                    Unlimited spins
-                                </label>
+                                <small class="d-block text-muted mt-1">
+                                    Customers must enter a bill number to spin the wheel
+                                </small>
                             </div>
                         </div>
-
-
-                        <!-- Add this section after the spin limits section -->
-<!-- <h5 class="mb-3"><i class="fas fa-receipt me-2"></i>Bill Number Settings</h5>
-
-<div class="mb-4">
-    <div class="form-check form-switch">
-        <input class="form-check-input" type="checkbox" name="require_bill_number" 
-               id="requireBillNumber" {% if shop_settings.require_bill_number %}checked{% endif %}>
-        <label class="form-check-label" for="requireBillNumber">
-            Require bill number for spins
-        </label>
-    </div>
-    <small class="text-muted">When enabled, customers must enter a bill number to spin</small>
-</div> -->
                         
-                        <div class="d-flex justify-content-end">
-                            <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-save me-1"></i>Save Settings
+                        <!-- Social Verification Section -->
+                        <div class="setting-item">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" name="require_social_verification" 
+                                       id="require_social" {% if settings.require_social_verification %}checked{% endif %}>
+                                <label class="form-check-label fw-medium" for="require_social">
+                                    Enable Social Media Verification
+                                </label>
+                                <small class="d-block text-muted mt-1">
+                                    Customers must verify social media actions before spinning
+                                </small>
+                            </div>
+                        </div>
+                        
+                        <!-- Social Verification Fields (Conditional) -->
+                        <div id="socialFields" style="display: {% if settings.require_social_verification %}block{% else %}none{% endif %}">
+                            <div class="setting-item">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" name="require_screenshot" 
+                                           id="require_screenshot" {% if settings.require_screenshot %}checked{% endif %}>
+                                    <label class="form-check-label fw-medium" for="require_screenshot">
+                                        Require Screenshot Proof
+                                    </label>
+                                    <small class="d-block text-muted mt-1">
+                                        Customers must upload screenshots as proof of verification
+                                    </small>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-4">
+                                <label for="instagram_url" class="form-label fw-medium">Instagram Page URL</label>
+                                <input type="url" class="form-control" name="instagram_url" 
+                                       value="{{ settings.instagram_url|default:'' }}" 
+                                       placeholder="https://instagram.com/yourpage" required>
+                                <small class="text-muted">URL customers will follow to verify</small>
+                            </div>
+                            
+                            <div class="mb-4">
+                                <label for="google_review_url" class="form-label fw-medium">Google Review URL</label>
+                                <input type="url" class="form-control" name="google_review_url" 
+                                       value="{{ settings.google_review_url|default:'' }}" 
+                                       placeholder="https://g.page/r/Cxyz/review" required>
+                                <small class="text-muted">URL for customers to leave reviews</small>
+                            </div>
+                        </div>
+                        
+                        <!-- Form Actions -->
+                        <div class="d-flex justify-content-between mt-4 pt-3 border-top">
+                            <button type="reset" class="btn btn-outline-secondary">
+                                <i class="fas fa-undo me-2"></i>Reset
+                            </button>
+                            <button type="submit" class="btn btn-primary px-4">
+                                <i class="fas fa-save me-2"></i>Save Settings
                             </button>
                         </div>
                     </form>
                 </div>
             </div>
+            
+            <div class="text-center text-muted small">
+                <i class="fas fa-info-circle me-1"></i> Changes take effect immediately
+            </div>
         </div>
     </div>
 </div>
 
-<!-- Font Awesome -->
-<script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
-<!-- Bootstrap JS -->
+<!-- JavaScript Libraries -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+
+<script>
+// Toggle social fields visibility
+document.getElementById('require_social').addEventListener('change', function() {
+    const socialFields = document.getElementById('socialFields');
+    socialFields.style.display = this.checked ? 'block' : 'none';
+    
+    // Toggle required attribute on URL fields
+    const urlInputs = socialFields.querySelectorAll('input[type="url"]');
+    urlInputs.forEach(input => {
+        input.required = this.checked;
+    });
+});
+
+// Initialize tooltips
+document.addEventListener('DOMContentLoaded', function() {
+    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+});
+</script>
+
 </body>
 </html>

@@ -1,0 +1,479 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="verification-container">
+    <div class="verification-card">
+        <div class="verification-header">
+            <h2 class="verification-title">Social Media Verification</h2>
+            <p class="verification-subtitle">Complete these quick steps to unlock your spin</p>
+            <div class="progress-steps">
+                <div class="step active">
+                    <span class="step-number">1</span>
+                    <span class="step-text">Enter Details</span>
+                </div>
+                <div class="step active">
+                    <span class="step-number">2</span>
+                    <span class="step-text">Social Verification</span>
+                </div>
+                <div class="step">
+                    <span class="step-number">3</span>
+                    <span class="step-text">Spin Wheel</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="verification-body">
+            <form method="post" enctype="multipart/form-data" class="verification-form">
+                {% csrf_token %}
+                
+                <div class="verification-grid">
+                    <!-- Instagram Section -->
+                    <div class="verification-item instagram-item">
+                        <div class="platform-icon">
+                            <i class="fab fa-instagram"></i>
+                        </div>
+                        <h3 class="platform-title">Instagram Follow</h3>
+                        <p class="platform-description">Follow our Instagram page for exclusive offers</p>
+                        <a href="{{ settings.instagram_url }}" target="_blank" class="btn btn-instagram">
+                            <i class="fas fa-external-link-alt"></i> Visit Instagram
+                        </a>
+                        
+                        {% if require_screenshot %}
+                        <div class="upload-section">
+                            <label class="upload-label" id="instagram-label">
+                                <i class="fas fa-cloud-upload-alt"></i>
+                                <span id="instagram-text">Upload Screenshot</span>
+                                <input type="file" name="instagram_screenshot" accept="image/*" required 
+                                       class="upload-input" id="instagram-input">
+                            </label>
+                            <small class="upload-hint">PNG or JPG, max 5MB</small>
+                            <div id="instagram-preview" class="file-preview"></div>
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Google Review Section -->
+                    <div class="verification-item google-item">
+                        <div class="platform-icon">
+                            <i class="fab fa-google"></i>
+                        </div>
+                        <h3 class="platform-title">Google Review</h3>
+                        <p class="platform-description">Share your experience with us</p>
+                        <a href="{{ settings.google_review_url }}" target="_blank" class="btn btn-google">
+                            <i class="fas fa-external-link-alt"></i> Leave Review
+                        </a>
+                        
+                        {% if require_screenshot %}
+                        <div class="upload-section">
+                            <label class="upload-label" id="google-label">
+                                <i class="fas fa-cloud-upload-alt"></i>
+                                <span id="google-text">Upload Screenshot</span>
+                                <input type="file" name="google_screenshot" accept="image/*" required 
+                                       class="upload-input" id="google-input">
+                            </label>
+                            <small class="upload-hint">PNG or JPG, max 5MB</small>
+                            <div id="google-preview" class="file-preview"></div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="verification-footer">
+                    <button type="submit" class="btn btn-primary btn-verify">
+                        <i class="fas fa-check-circle"></i> Complete Verification
+                    </button>
+                    <p class="verification-note">
+                        <i class="fas fa-lock"></i> Your information is secure and will not be shared
+                    </p>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+    :root {
+        --primary-color: #4361ee;
+        --instagram-color: #E1306C;
+        --google-color: #34A853;
+        --success-color: #4BB543;
+        --error-color: #dc3545;
+        --light-gray: #f8f9fa;
+        --border-radius: 12px;
+        --box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    }
+
+    /* Font Awesome Import */
+    @import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css');
+
+    .verification-container {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem;
+        background-color: var(--light-gray);
+    }
+
+    .verification-card {
+        background: white;
+        border-radius: var(--border-radius);
+        box-shadow: var(--box-shadow);
+        width: 100%;
+        max-width: 900px;
+        overflow: hidden;
+    }
+
+    .verification-header {
+        padding: 2rem;
+        text-align: center;
+        background: linear-gradient(135deg, var(--primary-color), #3a0ca3);
+        color: white;
+    }
+
+    .verification-title {
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        font-size: 1.8rem;
+    }
+
+    .verification-subtitle {
+        opacity: 0.9;
+        margin-bottom: 1.5rem;
+    }
+
+    .progress-steps {
+        display: flex;
+        justify-content: center;
+        margin-top: 1.5rem;
+    }
+
+    .step {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 0 1.5rem;
+        position: relative;
+    }
+
+    .step:not(:last-child):after {
+        content: '';
+        position: absolute;
+        top: 15px;
+        right: -20px;
+        width: 40px;
+        height: 2px;
+        background: rgba(255, 255, 255, 0.3);
+    }
+
+    .step-number {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+    }
+
+    .step.active .step-number {
+        background: white;
+        color: var(--primary-color);
+    }
+
+    .step-text {
+        font-size: 0.85rem;
+        opacity: 0.8;
+    }
+
+    .verification-body {
+        padding: 2rem;
+    }
+
+    .verification-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .verification-item {
+        padding: 1.5rem;
+        border-radius: var(--border-radius);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .verification-item:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+    }
+
+    .platform-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1rem;
+        font-size: 1.5rem;
+        color: white;
+    }
+
+    .instagram-item .platform-icon {
+        background: var(--instagram-color);
+    }
+
+    .google-item .platform-icon {
+        background: var(--google-color);
+    }
+
+    .platform-title {
+        text-align: center;
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+    }
+
+    .platform-description {
+        text-align: center;
+        color: #6c757d;
+        margin-bottom: 1.5rem;
+        font-size: 0.95rem;
+    }
+
+    .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0.6rem 1.2rem;
+        border-radius: 50px;
+        font-weight: 500;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        width: 100%;
+        margin-bottom: 1.5rem;
+    }
+
+    .btn i {
+        margin-right: 8px;
+    }
+
+    .btn-instagram {
+        background: var(--instagram-color);
+        color: white;
+        border: none;
+    }
+
+    .btn-instagram:hover {
+        background: #C13584;
+        color: white;
+        transform: translateY(-2px);
+    }
+
+    .btn-google {
+        background: var(--google-color);
+        color: white;
+        border: none;
+    }
+
+    .btn-google:hover {
+        background: #2d9247;
+        color: white;
+        transform: translateY(-2px);
+    }
+
+    .upload-section {
+        margin-top: 1rem;
+    }
+
+    .upload-label {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 1.5rem;
+        border: 2px dashed #dee2e6;
+        border-radius: var(--border-radius);
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-align: center;
+    }
+
+    .upload-label:hover {
+        border-color: var(--primary-color);
+        background: rgba(67, 97, 238, 0.05);
+    }
+
+    .upload-label i {
+        font-size: 2rem;
+        color: var(--primary-color);
+        margin-bottom: 0.5rem;
+    }
+
+    .upload-input {
+        display: none;
+    }
+
+    .upload-hint {
+        display: block;
+        margin-top: 0.5rem;
+        color: #6c757d;
+        font-size: 0.8rem;
+    }
+
+    /* File Preview Styles */
+    .file-preview {
+        margin-top: 10px;
+        padding: 10px;
+        background: #f8f9fa;
+        border-radius: var(--border-radius);
+        display: none;
+    }
+
+    .file-preview.show {
+        display: block;
+        animation: fadeIn 0.3s ease;
+    }
+
+    .file-info {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .file-icon {
+        color: var(--primary-color);
+        font-size: 1.2rem;
+    }
+
+    .file-name {
+        flex-grow: 1;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        font-size: 0.9rem;
+    }
+
+    .file-remove {
+        color: var(--error-color);
+        cursor: pointer;
+        font-size: 1.1rem;
+        transition: transform 0.2s ease;
+    }
+
+    .file-remove:hover {
+        transform: scale(1.1);
+    }
+
+    .verification-footer {
+        text-align: center;
+        margin-top: 2rem;
+    }
+
+    .btn-verify {
+        padding: 0.8rem 2rem;
+        font-size: 1rem;
+        background: var(--primary-color);
+        border: none;
+        box-shadow: 0 4px 15px rgba(67, 97, 238, 0.3);
+        transition: all 0.3s ease;
+    }
+
+    .btn-verify:hover {
+        background: #3a56e8;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(67, 97, 238, 0.4);
+    }
+
+    .verification-note {
+        margin-top: 1rem;
+        color: #6c757d;
+        font-size: 0.85rem;
+    }
+
+    .verification-note i {
+        margin-right: 5px;
+        color: var(--success-color);
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(5px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 768px) {
+        .verification-container {
+            padding: 1rem;
+        }
+        
+        .verification-header {
+            padding: 1.5rem 1rem;
+        }
+        
+        .verification-body {
+            padding: 1.5rem;
+        }
+        
+        .step {
+            padding: 0 0.8rem;
+        }
+        
+        .step:not(:last-child):after {
+            width: 20px;
+            right: -10px;
+        }
+
+        .verification-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Handle Instagram file upload
+    const instagramInput = document.getElementById('instagram-input');
+    if (instagramInput) {
+        setupFileUpload(instagramInput, 'instagram-preview', 'instagram-text');
+    }
+
+    // Handle Google file upload
+    const googleInput = document.getElementById('google-input');
+    if (googleInput) {
+        setupFileUpload(googleInput, 'google-preview', 'google-text');
+    }
+
+    function setupFileUpload(inputElement, previewId, textId) {
+        const previewElement = document.getElementById(previewId);
+        const textElement = document.getElementById(textId);
+
+        inputElement.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                // Update UI
+                textElement.textContent = 'Change File';
+                previewElement.innerHTML = `
+                    <div class="file-info">
+                        <i class="fas fa-file-image file-icon"></i>
+                        <span class="file-name">${file.name}</span>
+                        <i class="fas fa-times file-remove" title="Remove file"></i>
+                    </div>
+                `;
+                previewElement.classList.add('show');
+
+                // Add remove file functionality
+                const removeBtn = previewElement.querySelector('.file-remove');
+                removeBtn.addEventListener('click', function() {
+                    inputElement.value = '';
+                    previewElement.classList.remove('show');
+                    textElement.textContent = 'Upload Screenshot';
+                });
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

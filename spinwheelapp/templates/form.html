@@ -1,34 +1,291 @@
 {% extends 'base.html' %}
 {% load widget_tweaks %}
-{% block title %}Enter to Spin{% endblock %}
+
+{% block title %}Enter Your Details{% endblock %}
+
 {% block content %}
-<div class="row justify-content-center">
-    <div class="col-md-6">
-        <h2>Enter Your Details</h2>
-        <form method="post">
-            {% csrf_token %}
-            <div class="mb-3">
-                <label for="id_name" class="form-label">Name</label>
-                {{ form.name|add_class:"form-control" }}
-                {% if form.name.errors %}
-                    <div class="text-danger">{{ form.name.errors.0 }}</div>
+<div class="entry-container">
+    <div class="entry-card">
+        <div class="entry-header">
+            <h2 class="entry-title">Enter Your Details</h2>
+            <p class="entry-subtitle">Fill in your information to unlock your spin</p>
+            <div class="progress-steps">
+                <div class="step active">
+                    <span class="step-number">1</span>
+                    <span class="step-text">Enter Details</span>
+                </div>
+                <div class="step">
+                    <span class="step-number">2</span>
+                    <span class="step-text">{% if require_social_verification %}Social Verification{% else %}Spin Wheel{% endif %}</span>
+                </div>
+                {% if require_social_verification %}
+                <div class="step">
+                    <span class="step-number">3</span>
+                    <span class="step-text">Spin Wheel</span>
+                </div>
                 {% endif %}
             </div>
-            <div class="mb-3">
-                <label for="id_phone" class="form-label">Phone</label>
-                {{ form.phone|add_class:"form-control" }}
-                {% if form.phone.errors %}
-                    <div class="text-danger">{{ form.phone.errors.0 }}</div>
+        </div>
+
+        <div class="entry-body">
+            <form method="post" novalidate class="entry-form">
+                {% csrf_token %}
+                
+                <!-- Full Name -->
+                <div class="form-group">
+                    <label for="id_name" class="form-label">
+                        <i class="fas fa-user"></i> Full Name<span class="required">*</span>
+                    </label>
+                    {{ form.name|add_class:"form-control"|attr:"placeholder:Enter your name" }}
+                    {% if form.name.errors %}
+                        <div class="form-error">{{ form.name.errors.0 }}</div>
+                    {% endif %}
+                </div>
+
+                <!-- Phone Number -->
+                <div class="form-group">
+                    <label for="id_phone" class="form-label">
+                        <i class="fas fa-mobile-alt"></i> Mobile Number<span class="required">*</span>
+                    </label>
+                    {{ form.phone|add_class:"form-control"|attr:"placeholder:Enter your mobile number" }}
+                    {% if form.phone.errors %}
+                        <div class="form-error">{{ form.phone.errors.0 }}</div>
+                    {% endif %}
+                </div>
+
+                <!-- Bill Number (Conditional) -->
+                {% if require_bill %}
+                <div class="form-group">
+                    <label for="id_bill_number" class="form-label">
+                        <i class="fas fa-receipt"></i> Bill Number {% if form.bill_number.field.required %}<span class="required">*</span>{% endif %}
+                    </label>
+                    {{ form.bill_number|add_class:"form-control"|attr:"placeholder:Enter bill/receipt number" }}
+                    {% if form.bill_number.errors %}
+                        <div class="form-error">{{ form.bill_number.errors.0 }}</div>
+                    {% endif %}
+                </div>
                 {% endif %}
-            </div>
-            <div class="mb-3">
-                {{ form.shop_code|add_class:"form-control" }}
-                {% if form.shop_code.errors %}
-                    <div class="text-danger">{{ form.shop_code.errors.0 }}</div>
-                {% endif %}
-            </div>
-            <button class="btn btn-success" type="submit">Continue to Spin</button>
-        </form>
+
+                <!-- Hidden Shop Code -->
+                {{ form.shop_code }}
+
+                <div class="form-footer">
+                    <button type="submit" class="btn-submit">
+                        Continue <i class="fas fa-arrow-right"></i>
+                    </button>
+                    <p class="form-note">
+                        <i class="fas fa-lock"></i> Your information is secure and will not be shared
+                    </p>
+                </div>
+            </form>
+        </div>
     </div>
 </div>
+
+<style>
+    :root {
+        --primary-color: #4361ee;
+        --success-color: #4BB543;
+        --error-color: #dc3545;
+        --light-gray: #f8f9fa;
+        --border-radius: 12px;
+        --box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    }
+
+    .entry-container {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem;
+        background-color: var(--light-gray);
+    }
+
+    .entry-card {
+        background: white;
+        border-radius: var(--border-radius);
+        box-shadow: var(--box-shadow);
+        width: 100%;
+        max-width: 500px;
+        overflow: hidden;
+    }
+
+    .entry-header {
+        padding: 2rem;
+        text-align: center;
+        background: linear-gradient(135deg, var(--primary-color), #3a0ca3);
+        color: white;
+    }
+
+    .entry-title {
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        font-size: 1.8rem;
+    }
+
+    .entry-subtitle {
+        opacity: 0.9;
+        margin-bottom: 1.5rem;
+    }
+
+    .progress-steps {
+        display: flex;
+        justify-content: center;
+        margin-top: 1.5rem;
+    }
+
+    .step {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 0 1.5rem;
+        position: relative;
+    }
+
+    .step:not(:last-child):after {
+        content: '';
+        position: absolute;
+        top: 15px;
+        right: -20px;
+        width: 40px;
+        height: 2px;
+        background: rgba(255, 255, 255, 0.3);
+    }
+
+    .step-number {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+    }
+
+    .step.active .step-number {
+        background: white;
+        color: var(--primary-color);
+    }
+
+    .step-text {
+        font-size: 0.85rem;
+        opacity: 0.8;
+    }
+
+    .entry-body {
+        padding: 2rem;
+    }
+
+    .entry-form {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .form-group {
+        margin-bottom: 0;
+    }
+
+    .form-label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+        color: #495057;
+    }
+
+    .form-label i {
+        margin-right: 8px;
+        color: var(--primary-color);
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 0.8rem 1rem;
+        border: 1px solid #ced4da;
+        border-radius: var(--border-radius);
+        font-size: 1rem;
+        transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+    }
+
+    .form-control:focus {
+        border-color: var(--primary-color);
+        outline: 0;
+        box-shadow: 0 0 0 0.2rem rgba(67, 97, 238, 0.25);
+    }
+
+    .form-error {
+        color: var(--error-color);
+        font-size: 0.85rem;
+        margin-top: 0.5rem;
+    }
+
+    .required {
+        color: var(--error-color);
+    }
+
+    .form-footer {
+        text-align: center;
+        margin-top: 1rem;
+    }
+
+    .btn-submit {
+        width: 100%;
+        padding: 0.8rem;
+        background: var(--primary-color);
+        color: white;
+        border: none;
+        border-radius: var(--border-radius);
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(67, 97, 238, 0.3);
+    }
+
+    .btn-submit:hover {
+        background: #3a56e8;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(67, 97, 238, 0.4);
+    }
+
+    .btn-submit i {
+        margin-left: 8px;
+    }
+
+    .form-note {
+        margin-top: 1rem;
+        color: #6c757d;
+        font-size: 0.85rem;
+    }
+
+    .form-note i {
+        margin-right: 5px;
+        color: var(--success-color);
+    }
+
+    @media (max-width: 768px) {
+        .entry-container {
+            padding: 1rem;
+        }
+        
+        .entry-header {
+            padding: 1.5rem 1rem;
+        }
+        
+        .entry-body {
+            padding: 1.5rem;
+        }
+        
+        .step {
+            padding: 0 0.8rem;
+        }
+        
+        .step:not(:last-child):after {
+            width: 20px;
+            right: -10px;
+        }
+    }
+</style>
 {% endblock %}

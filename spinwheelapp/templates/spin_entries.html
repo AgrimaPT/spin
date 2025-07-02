@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <title>Spin Entries</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+
     <style>
         body {
             background-color: #f8f9fa;
@@ -43,10 +46,26 @@
             text-align: center;
             padding: 20px;
         }
+        .screenshot-thumbnail {
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .screenshot-thumbnail:hover {
+            transform: scale(1.05);
+        }
+        .modal-image {
+            max-width: 100%;
+            max-height: 80vh;
+        }
     </style>
 </head>
 <body>
 
+<!-- Navigation remains the same -->
 <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
   <div class="container-fluid">
     <a class="navbar-brand" href="{% url 'offer_list' %}">🎡 SpinWheel Admin</a>
@@ -66,16 +85,15 @@
             <i class="fas fa-store me-1"></i>Shop Profile
           </a>
         </li>
-        <!-- <li class="nav-item">
-          <a class="nav-link" href="{% url 'spin_entries' %}">
-            <i class="fas fa-history me-1"></i>Spin Entries
-          </a>
-        </li> -->
+        
         <li class="nav-item">
           <a class="nav-link" href="{% url 'logout' %}">
             <i class="fas fa-sign-out-alt me-1"></i>Logout
           </a>
         </li>
+
+
+        
       </ul>
     </div>
   </div>
@@ -105,7 +123,9 @@
                             <th>Date & Time</th>
                             <th>Customer Name</th>
                             <th>Phone Number</th>
+                            <th>Bill Number</th>
                             <th>Reward</th>
+                            <th>Screenshots</th> <!-- New column -->
                         </tr>
                     </thead>
                     <tbody>
@@ -115,8 +135,39 @@
                             <td class="searchable">{{ entry.name }}</td>
                             <td class="searchable">{{ entry.phone }}</td>
                             <td class="searchable">
+                                {% if entry.bill_number %}
+                                    {{ entry.bill_number }}
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </td>
+                            <td class="searchable">
                                 <span class="offer-color" style="background-color:{{ entry.offer.color }}"></span>
                                 {{ entry.offer.name }}
+                            </td>
+                            <td>
+                                {% if entry.social_verification %}
+                                <div class="d-flex">
+                                    {% if entry.social_verification.instagram_screenshot %}
+                                    <img src="{{ entry.social_verification.instagram_screenshot.url }}" 
+                                         class="screenshot-thumbnail me-2" 
+                                         data-bs-toggle="modal" 
+                                         data-bs-target="#imageModal"
+                                         data-image="{{ entry.social_verification.instagram_screenshot.url }}"
+                                         title="Instagram Screenshot">
+                                    {% endif %}
+                                    {% if entry.social_verification.google_review_screenshot %}
+                                    <img src="{{ entry.social_verification.google_review_screenshot.url }}" 
+                                         class="screenshot-thumbnail" 
+                                         data-bs-toggle="modal" 
+                                         data-bs-target="#imageModal"
+                                         data-image="{{ entry.social_verification.google_review_screenshot.url }}"
+                                         title="Google Review Screenshot">
+                                    {% endif %}
+                                </div>
+                                {% else %}
+                                -
+                                {% endif %}
                             </td>
                         </tr>
                         {% endfor %}
@@ -133,6 +184,24 @@
                 <p class="text-muted">No spin entries yet. When customers spin your wheel, their entries will appear here.</p>
             </div>
             {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Image Modal -->
+<div class="modal fade" id="imageModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Screenshot</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center">
+                <img id="modalImage" src="" class="modal-image" alt="Screenshot">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
         </div>
     </div>
 </div>
@@ -176,6 +245,17 @@ document.addEventListener('DOMContentLoaded', function() {
             noResults.style.display = hasResults ? 'none' : 'block';
         }
     });
+
+    // Image modal functionality
+    const imageModal = document.getElementById('imageModal');
+    if (imageModal) {
+        imageModal.addEventListener('show.bs.modal', function(event) {
+            const button = event.relatedTarget;
+            const imageUrl = button.getAttribute('data-image');
+            const modalImage = document.getElementById('modalImage');
+            modalImage.src = imageUrl;
+        });
+    }
 });
 </script>
 </body>

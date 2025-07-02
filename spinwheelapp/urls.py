@@ -1,5 +1,7 @@
 from django.urls import path
 from . import views
+from django.conf import settings
+from django.conf.urls.static import static
 
 urlpatterns = [
     path('signup/', views.signup_view, name='signup'),
@@ -18,6 +20,9 @@ urlpatterns = [
     path('process-spin/', views.process_spin, name='process_spin'),
     path('spin-entries/', views.spin_entries, name='spin_entries'),
     #path('<str:shop_code>/spin-entries/', views.spin_entries, name='spin_entries'),
+    path('verify/<str:shop_code>/', views.social_verification, name='social_verification'),
+    
 
 
-]
+    
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

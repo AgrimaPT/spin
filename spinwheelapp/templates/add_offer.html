@@ -1,35 +1,194 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Add Offer</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add New Offer - SpinWheel Admin</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #4e73df;
+            --primary-dark: #2e59d9;
+            --secondary: #f8f9fc;
+            --light: #f8f9fa;
+            --dark: #5a5c69;
+            --gray: #d1d3e2;
+            --danger: #e74a3b;
+            --success: #1cc88a;
+        }
+        
+        body {
+            background-color: var(--light);
+            font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        }
+        
+        .form-container {
+            max-width: 600px;
+            margin: 2rem auto;
+            background: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.1);
+            padding: 2rem;
+        }
+        
+        .page-header {
+            border-bottom: 1px solid var(--gray);
+            padding-bottom: 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .form-label {
+            font-weight: 600;
+            color: var(--dark);
+        }
+        
+        .form-control, .form-select {
+            padding: 0.5rem 0.75rem;
+            border-radius: 0.35rem;
+            border: 1px solid var(--gray);
+        }
+        
+        .form-control:focus, .form-select:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 0.2rem rgba(78, 115, 223, 0.25);
+        }
+        
+        .form-control-color {
+            width: 3rem;
+            height: 3rem;
+            padding: 0.2rem;
+            cursor: pointer;
+        }
+        
+        .btn-primary {
+            background-color: var(--primary);
+            border-color: var(--primary);
+            padding: 0.5rem 1.5rem;
+        }
+        
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+            border-color: var(--primary-dark);
+        }
+        
+        .alert-danger {
+            background-color: rgba(231, 74, 59, 0.1);
+            border-color: rgba(231, 74, 59, 0.2);
+            color: var(--danger);
+        }
+        
+        .percentage-help {
+            font-size: 0.85rem;
+            color: var(--dark);
+            margin-top: 0.5rem;
+        }
+        
+        @media (max-width: 576px) {
+            .form-container {
+                padding: 1.5rem;
+                margin: 1rem;
+            }
+        }
+    </style>
 </head>
 <body>
-<div class="container mt-4">
-    <h2>Add a New Offer</h2>
+    <div class="container py-4">
+        <div class="form-container">
+            <div class="page-header">
+                <h2 class="mb-0">
+                    <i class="fas fa-plus-circle me-2"></i>Add New Offer
+                </h2>
+                <p class="text-muted mb-0">Create a new segment for your spin wheel</p>
+            </div>
+            
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-danger alert-dismissible fade show">
+                        <i class="fas fa-exclamation-circle me-2"></i>{{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+            
+            <form method="post">
+                {% csrf_token %}
+                
+                <div class="mb-4">
+                    <label for="offerName" class="form-label">Offer Name</label>
+                    <input type="text" 
+                           class="form-control" 
+                           id="offerName" 
+                           name="name" 
+                           placeholder="E.g., 10% Discount" 
+                           required>
+                    <small class="text-muted">This will appear on the wheel segment</small>
+                </div>
+                
+                <div class="mb-4">
+                    <label for="offerColor" class="form-label">Segment Color</label>
+                    <div class="d-flex align-items-center">
+                        <input type="color" 
+                               class="form-control form-control-color" 
+                               id="offerColor" 
+                               name="color" 
+                               value="#ffffff"
+                               title="Choose segment color">
+                        <span class="ms-3" id="colorValue">#ffffff</span>
+                    </div>
+                    <small class="text-muted">This color will represent the offer on the wheel</small>
+                </div>
+                
+                <div class="mb-4">
+                    <label for="offerPercentage" class="form-label">Probability Percentage</label>
+                    <input type="number" 
+                           class="form-control" 
+                           id="offerPercentage" 
+                           name="percentage" 
+                           value="0" 
+                           min="0" 
+                           max="100" 
+                           step="0.01" 
+                           placeholder="0.00"
+                           required>
+                    <div class="percentage-help">
+                        <i class="fas fa-info-circle me-1"></i>
+                        The chance this offer will be selected (0-100%)
+                    </div>
+                </div>
+                
+                <div class="d-flex justify-content-between mt-4 pt-3 border-top">
+                    <a href="{% url 'offer_list' %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left me-2"></i>Cancel
+                    </a>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save me-2"></i>Add Offer
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
 
-    {% if messages %}
-        {% for message in messages %}
-            <div class="alert alert-danger">{{ message }}</div>
-        {% endfor %}
-    {% endif %}
-
-    <form method="post">
-        {% csrf_token %}
-        <div class="mb-3">
-            <label for="name" class="form-label">Offer Name</label>
-            <input type="text" class="form-control" name="name" required>
-        </div>
-        <div class="mb-3">
-            <label for="color" class="form-label">Color</label>
-            <input type="color" class="form-control form-control-color" name="color" value="#ffffff">
-        </div>
-        <div class="mb-3">
-            <label for="percentage" class="form-label">Percentage Probability</label>
-            <input type="number" class="form-control" name="percentage" value="0" min="0" max="100" step="0.01" required>
-        </div>
-        <button type="submit" class="btn btn-primary">Add Offer</button>
-    </form>
-</div>
+    <!-- JavaScript Libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+    
+    <script>
+        // Update color value display when color picker changes
+        document.getElementById('offerColor').addEventListener('input', function() {
+            document.getElementById('colorValue').textContent = this.value;
+        });
+        
+        // Real-time validation for percentage input
+        document.getElementById('offerPercentage').addEventListener('input', function() {
+            const value = parseFloat(this.value) || 0;
+            
+            if (value > 100) {
+                this.classList.add('is-invalid');
+            } else {
+                this.classList.remove('is-invalid');
+            }
+        });
+    </script>
 </body>
 </html>

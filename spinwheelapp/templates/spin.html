@@ -4,6 +4,15 @@
     <title>Spin the Wheel</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
+
+        html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  width: 100%;
+  overflow-x: hidden;
+}
+
         :root {
             --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             --secondary-gradient: linear-gradient(to right, #ff8a00, #da1b60);
@@ -37,21 +46,53 @@
             text-align: center;
             padding: 0;
             margin: 0;
-            background: #f9f9f9;
+            
             min-height: 100vh;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            background-color: #f7dfdf;
+            background-color: #11cde2;
+            background: linear-gradient(135deg, #d5e7f1 0%, #addae3 100%); 
+    overflow: hidden; 
+    position: relative; 
+    
             
-
+            
             background-repeat: repeat;
             color: #333;
             height: 100%;
             width: 100%;
             overflow-x: hidden;
+
+            box-sizing: border-box;
+            -webkit-font-smoothing: antialiased;
+  -webkit-overflow-scrolling: touch;
+            
         }
+
+        body::before {
+    content: '';
+    position: absolute;
+    top: -10%;
+    left: -10%;
+    width: 120%;
+    height: 120%;
+    background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><circle cx="25" cy="25" r="15" fill-opacity="0.1" fill="%23d0a9a9"/><circle cx="75" cy="75" r="10" fill-opacity="0.15" fill="%23b88b8b"/></svg>');
+    background-size: 200px 200px;
+    animation: moveBackground 30s linear infinite alternate; /* Gentle animation */
+    z-index: -1;
+    opacity: 0.7;
+}
+
+@keyframes moveBackground {
+    from {
+        transform: translate(0, 0);
+    }
+    to {
+        transform: translate(50px, 50px);
+    }
+}
 
         .container {
             max-width: 800px;
@@ -166,6 +207,20 @@
         pointer-events: none;
     }
 
+    /* #wheel-container::after {
+        content: '';
+        position: absolute;
+        top: 15px;
+        left: 15px;
+        right: 15px;
+        bottom: 15px;
+        border-radius: 50%;
+        background: 
+            radial-gradient(circle at center, transparent 40%, rgba(0,0,0,0.3) 65%),
+            linear-gradient(135deg, rgba(238, 184, 145, 0.3) 0%, rgba(233, 195, 170, 0.5) 50%, rgba(209, 190, 164, 0.3) 100%);
+        pointer-events: none;
+    } */
+
 
 
         
@@ -194,7 +249,7 @@
 
         .segment-label {
             position: absolute;
-            top: 45%;
+            top: 43%;
             left: 45%;
             transform-origin: center;
             transform: rotate(var(--angle)) translateY(-150px);
@@ -473,6 +528,7 @@ canvas.confetti-canvas {
         }
 
         @media (max-width: 768px) {
+            
             h1 {
                 font-size: 2.5rem;
                 text-align: center;
@@ -493,7 +549,7 @@ canvas.confetti-canvas {
 
             .segment-label {
                 transform: rotate(var(--angle)) translateY(-150px);
-                font-size: 16px;
+                font-size: 1px;
             }
 
             .segment-label.selected {

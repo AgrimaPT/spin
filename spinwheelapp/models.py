@@ -2,25 +2,32 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+import random
+from django.core.validators import RegexValidator
 
-# If using default User model (recommended for simplicity)
-# No need to create a custom Owner model unless needed
+
 class ShopProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     shop_name = models.CharField(max_length=100)
     shop_code = models.CharField(max_length=10, unique=True)
 
-    def __str__(self):
-        return self.shop_name
+    def save(self, *args, **kwargs):
+        if not self.shop_code:  # Only for new instances
+            self.shop_code = self.generate_unique_shop_code(self.shop_name)
+        super().save(*args, **kwargs)
+
+    @classmethod
+    def generate_unique_shop_code(cls, shop_name, max_attempts=100):
+        prefix = shop_name[:2].upper() if len(shop_name) >= 2 else 'SH'
+        for _ in range(max_attempts):
+            random_digits = ''.join(random.choices('0123456789', k=4))
+            shop_code = f"{prefix}{random_digits}"
+            if not cls.objects.filter(shop_code=shop_code).exists():
+                return shop_code
+        raise RuntimeError("Could not generate a unique shop code after multiple attempts")
     
-# @receiver(post_save, sender=User)
-# def create_shop_profile(sender, instance, created, **kwargs):
-#     if created:
-#         ShopProfile.objects.create(
-#             user=instance,
-#             shop_name='New Shop',
-#             shop_code=f'SHOP{instance.id:04d}'
-#         )
+    def __str__(self):
+        return f"{self.shop_name } x {self.shop_code}"
 
     
 class Offer(models.Model):
@@ -34,31 +41,65 @@ class Offer(models.Model):
 
 class SpinEntry(models.Model):
     name = models.CharField(max_length=100)
-    phone = models.CharField(max_length=15)
-    offer = models.ForeignKey(Offer, on_delete=models.CASCADE)
+    
+    # offer = models.ForeignKey(Offer, on_delete=models.CASCADE)
+    offer = models.ForeignKey(Offer, on_delete=models.CASCADE, null=True, blank=True)
     shop = models.ForeignKey(ShopProfile, on_delete=models.CASCADE)
     timestamp = models.DateTimeField(auto_now_add=True)
     bill_number = models.CharField(max_length=50, blank=True, null=True)
+    
+    phone = models.CharField(max_length=10, validators=[
+        RegexValidator(
+            regex=r'^[6-9]\d{9}$',
+            message="Enter a valid  phone number"
+        )
+    ])
 
     def __str__(self):
         return f"{self.name} - {self.offer.name} ({self.timestamp.date()})"
 
 class ShopSettings(models.Model):
     shop = models.OneToOneField(ShopProfile, on_delete=models.CASCADE)
-    spins_per_day = models.IntegerField(
-        default=1,
-        choices=(
-            (1, '1 spin per day'),
-            (2, '2 spins per day'),
-            (0, 'Unlimited spins')
-        ),
-        help_text="Maximum spins allowed per mobile number per day"
-    )
 
     require_bill_number = models.BooleanField(
         default=False,
         help_text="Enable to require bill number for spin entries"
     )
+
+    require_social_verification = models.BooleanField(
+        default=False,
+        help_text="Enable to require social media verification before spinning"
+    )
+    require_screenshot = models.BooleanField(
+        default=False,
+        help_text="Enable to require screenshot proof for social verification"
+    )
+    instagram_url = models.URLField(blank=True, null=True)
+    google_review_url = models.URLField(blank=True, null=True)
     
     def __str__(self):
-        return f"Settings for {self.shop.shop_name}"
+        return f"Settings for {self.shop.shop_name}-{self.shop.shop_code}"
+    
+
+from django.core.validators import FileExtensionValidator
+
+class SocialVerification(models.Model):
+    entry = models.OneToOneField(SpinEntry, on_delete=models.CASCADE, related_name='social_verification')
+    instagram_screenshot = models.ImageField(
+        upload_to='verifications/instagram/%Y/%m/%d/',
+        validators=[FileExtensionValidator(allowed_extensions=['jpg', 'jpeg', 'png'])],
+        help_text="Upload screenshot of Instagram follow"
+    )
+    google_review_screenshot = models.ImageField(
+        upload_to='verifications/google/%Y/%m/%d/',
+        validators=[FileExtensionValidator(allowed_extensions=['jpg', 'jpeg', 'png'])],
+        help_text="Upload screenshot of Google review"
+    )
+    submitted_at = models.DateTimeField(auto_now_add=True)
+
+    # def __str__(self):
+    #     return f"Verification for {self.entry.name}"
+    def __str__(self):
+        if not self.entry:
+            return "Verification (no associated entry)"
+        return f"Verification for {self.entry.name if self.entry.name else 'Unknown User'}"
