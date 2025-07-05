@@ -10,6 +10,11 @@ class ShopProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     shop_name = models.CharField(max_length=100)
     shop_code = models.CharField(max_length=10, unique=True)
+    whatsapp_number = models.CharField(
+        max_length=15,default="918848647616",
+        validators=[RegexValidator(r'^[0-9]+$', 'Enter a valid phone number')],
+        help_text="WhatsApp number with country code (e.g. 919876543210)"
+    )
 
     def save(self, *args, **kwargs):
         if not self.shop_code:  # Only for new instances
@@ -46,7 +51,7 @@ class SpinEntry(models.Model):
     offer = models.ForeignKey(Offer, on_delete=models.CASCADE, null=True, blank=True)
     shop = models.ForeignKey(ShopProfile, on_delete=models.CASCADE)
     timestamp = models.DateTimeField(auto_now_add=True)
-    bill_number = models.CharField(max_length=50, blank=True, null=True)
+    bill_number = models.CharField(max_length=50, blank=True, null=True,default=None )
     
     phone = models.CharField(max_length=10, validators=[
         RegexValidator(
@@ -55,8 +60,24 @@ class SpinEntry(models.Model):
         )
     ])
 
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['shop', 'bill_number'],
+                name='unique_bill_per_shop',
+                condition=models.Q(bill_number__isnull=False) & ~models.Q(bill_number=''),
+            )
+        ]
+
     def __str__(self):
-        return f"{self.name} - {self.offer.name} ({self.timestamp.date()})"
+        return f"{self.name} - {self.offer.name if self.offer else 'No Offer'} ({self.timestamp.date()})"
+
+class GameType(models.TextChoices):
+    SPIN_WHEEL = 'SW', 'Spin Wheel'
+    SCRATCH_CARD = 'SC', 'Scratch Card'
+
+
+
 
 class ShopSettings(models.Model):
     shop = models.OneToOneField(ShopProfile, on_delete=models.CASCADE)
@@ -76,6 +97,12 @@ class ShopSettings(models.Model):
     )
     instagram_url = models.URLField(blank=True, null=True)
     google_review_url = models.URLField(blank=True, null=True)
+
+    game_type = models.CharField(
+        max_length=2,
+        choices=GameType.choices,
+        default=GameType.SPIN_WHEEL
+    )
     
     def __str__(self):
         return f"Settings for {self.shop.shop_name}-{self.shop.shop_code}"

@@ -3,137 +3,122 @@
 <head>
     <meta charset="UTF-8">
     <title>Settings - SpinWheel Admin</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Bootstrap & Font Awesome -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+
+    <!-- Custom Styles -->
     <style>
         :root {
             --primary: #4e73df;
             --primary-dark: #2e59d9;
-            --secondary: #f8f9fc;
+            --gray: #d1d3e2;
             --light: #f8f9fa;
             --dark: #5a5c69;
-            --gray: #d1d3e2;
-            --success: #1cc88a;
         }
-        
+
         body {
             background-color: var(--light);
-            font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            font-family: 'Nunito', sans-serif;
         }
-        
+
         .settings-card {
             border: none;
             border-radius: 0.35rem;
-            box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
-            overflow: hidden;
+            box-shadow: 0 0.15rem 1.75rem rgba(58, 59, 69, 0.15);
         }
-        
-        .card-header {
-            background-color: white;
-            border-bottom: 1px solid var(--gray);
-            padding: 1.25rem 1.5rem;
-        }
-        
+
         .form-switch .form-check-input {
-            width: 3em;
-            height: 1.5em;
-            margin-left: -2.5em;
+            width: 2.5em;
+            height: 1.25em;
         }
-        
-        .form-switch .form-check-input:checked {
-            background-color: var(--primary);
-            border-color: var(--primary);
-        }
-        
+
         .form-control, .form-select {
-            padding: 0.5rem 0.75rem;
             border-radius: 0.35rem;
             border: 1px solid var(--gray);
         }
-        
+
         .form-control:focus, .form-select:focus {
             border-color: var(--primary);
             box-shadow: 0 0 0 0.2rem rgba(78, 115, 223, 0.25);
         }
-        
+
         .btn-primary {
             background-color: var(--primary);
             border-color: var(--primary);
-            padding: 0.5rem 1.5rem;
         }
-        
+
         .btn-primary:hover {
             background-color: var(--primary-dark);
-            border-color: var(--primary-dark);
         }
-        
+
         .section-title {
             font-size: 1rem;
             font-weight: 600;
             color: var(--dark);
             margin-bottom: 1rem;
-            padding-bottom: 0.5rem;
             border-bottom: 1px solid var(--gray);
+            padding-bottom: 0.5rem;
         }
-        
-        .setting-item {
-            padding: 1rem 0;
-            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-        }
-        
-        .setting-item:last-child {
-            border-bottom: none;
-        }
-        
+
         #socialFields {
             background-color: rgba(78, 115, 223, 0.05);
             border-radius: 0.35rem;
-            padding: 1.5rem;
+            padding: 1rem;
             margin-top: 1rem;
-            transition: all 0.3s ease;
+            display: none;
+        }
+
+        @media (max-width: 576px) {
+            .navbar-brand {
+                font-size: 1rem;
+            }
+            .card-header h4 {
+                font-size: 1rem;
+            }
         }
     </style>
 </head>
 <body>
 
-<!-- Navigation Bar -->
+<!-- Navbar -->
 <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow">
-  <div class="container-fluid">
-    <a class="navbar-brand fw-bold" href="{% url 'offer_list' %}">
-        <i class="fas fa-circle-notch me-2"></i>SpinWheel Admin
-    </a>
-    
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent"
-            aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
-      <span class="navbar-toggler-icon"></span>
-    </button>
-
-    <div class="collapse navbar-collapse" id="navbarContent">
-      <ul class="navbar-nav ms-auto">
-        <li class="nav-item">
-          <a class="nav-link active" href="{% url 'settings' %}">
-            <i class="fas fa-cog me-1"></i>Settings
-          </a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="{% url 'update_shop_profile' %}">
-            <i class="fas fa-store me-1"></i>Shop Profile
-          </a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="{% url 'logout' %}">
-            <i class="fas fa-sign-out-alt me-1"></i>Logout
-          </a>
-        </li>
-      </ul>
+    <div class="container-fluid">
+        <a class="navbar-brand fw-bold" href="{% url 'offer_list' %}">
+            <i class="fas fa-circle-notch me-2"></i>SpinWheel Admin
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent"
+                aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarContent">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item">
+                    <a class="nav-link active" href="{% url 'settings' %}">
+                        <i class="fas fa-cog me-1"></i>Settings
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'update_shop_profile' %}">
+                        <i class="fas fa-store me-1"></i>Shop Profile
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'logout' %}">
+                        <i class="fas fa-sign-out-alt me-1"></i>Logout
+                    </a>
+                </li>
+            </ul>
+        </div>
     </div>
-  </div>
 </nav>
 
 <!-- Main Content -->
-<div class="container py-5">
+<div class="container py-4">
     <div class="row justify-content-center">
-        <div class="col-lg-8">
+        <div class="col-lg-8 col-md-10">
             <div class="card settings-card mb-4">
                 <div class="card-header">
                     <div class="d-flex justify-content-between align-items-center">
@@ -143,75 +128,86 @@
                         </a>
                     </div>
                 </div>
-                
                 <div class="card-body">
                     <form method="post">
                         {% csrf_token %}
-                        
-                        <!-- Spin Settings Section -->
+
+                        <!-- Game Type -->
+                        <h5 class="section-title">Game Type Selection</h5>
+                        <div class="mb-3">
+                            <label class="form-label fw-medium">Select Game Type</label>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="game_type" id="spinWheel"
+                                       value="SW" {% if settings.game_type == 'SW' %}checked{% endif %}>
+                                <label class="form-check-label" for="spinWheel">
+                                    <i class="fas fa-circle-notch me-2"></i> Spin Wheel
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="game_type" id="scratchCard"
+                                       value="SC" {% if settings.game_type == 'SC' %}checked{% endif %}>
+                                <label class="form-check-label" for="scratchCard">
+                                    <i class="fas fa-ticket-alt me-2"></i> Scratch Card
+
+
+                                </label>
+                            </div>
+                            <small class="text-muted">Choose between spin wheel or scratch card for customer rewards</small>
+                        </div>
+
+                        <!-- Require Bill -->
                         <h5 class="section-title">Spin Requirements</h5>
-                        
-                        <div class="setting-item">
-                            <div class="form-check form-switch">
-                                <input class="form-check-input" type="checkbox" id="require_bill_number" 
-                                       name="require_bill_number" {% if settings.require_bill_number %}checked{% endif %}>
-                                <label class="form-check-label fw-medium" for="require_bill_number">
-                                    Require Bill Number for Spins
-                                </label>
-                                <small class="d-block text-muted mt-1">
-                                    Customers must enter a bill number to spin the wheel
-                                </small>
-                            </div>
+                        <div class="form-check form-switch mb-3">
+                            <input class="form-check-input" type="checkbox" id="require_bill_number"
+                                   name="require_bill_number" {% if settings.require_bill_number %}checked{% endif %}>
+                            <label class="form-check-label fw-medium" for="require_bill_number">
+                                Require Bill Number for Spins
+                            </label>
+                            <small class="d-block text-muted">Customers must enter a bill number to spin</small>
                         </div>
-                        
-                        <!-- Social Verification Section -->
-                        <div class="setting-item">
-                            <div class="form-check form-switch">
-                                <input class="form-check-input" type="checkbox" name="require_social_verification" 
-                                       id="require_social" {% if settings.require_social_verification %}checked{% endif %}>
-                                <label class="form-check-label fw-medium" for="require_social">
-                                    Enable Social Media Verification
-                                </label>
-                                <small class="d-block text-muted mt-1">
-                                    Customers must verify social media actions before spinning
-                                </small>
-                            </div>
+
+                        <!-- Social Verification -->
+                        <div class="form-check form-switch mb-3">
+                            <input class="form-check-input" type="checkbox" id="require_social"
+                                   name="require_social_verification"
+                                   {% if settings.require_social_verification %}checked{% endif %}>
+                            <label class="form-check-label fw-medium" for="require_social">
+                                Enable Social Media Verification
+                            </label>
+                            <small class="d-block text-muted">Customer must verify social action before spinning</small>
                         </div>
-                        
-                        <!-- Social Verification Fields (Conditional) -->
-                        <div id="socialFields" style="display: {% if settings.require_social_verification %}block{% else %}none{% endif %}">
-                            <div class="setting-item">
-                                <div class="form-check form-switch">
-                                    <input class="form-check-input" type="checkbox" name="require_screenshot" 
-                                           id="require_screenshot" {% if settings.require_screenshot %}checked{% endif %}>
-                                    <label class="form-check-label fw-medium" for="require_screenshot">
-                                        Require Screenshot Proof
-                                    </label>
-                                    <small class="d-block text-muted mt-1">
-                                        Customers must upload screenshots as proof of verification
-                                    </small>
-                                </div>
+
+                        <!-- Social Fields -->
+                        <div id="socialFields" {% if settings.require_social_verification %}style="display: block;"{% endif %}>
+                            <div class="form-check form-switch mb-3">
+                                <input class="form-check-input" type="checkbox" id="require_screenshot"
+                                       name="require_screenshot"
+                                       {% if settings.require_screenshot %}checked{% endif %}>
+                                <label class="form-check-label fw-medium" for="require_screenshot">
+                                    Require Screenshot Proof
+                                </label>
+                                <small class="d-block text-muted">Customer must upload screenshots as proof</small>
                             </div>
-                            
-                            <div class="mb-4">
+
+                            <div class="mb-3">
                                 <label for="instagram_url" class="form-label fw-medium">Instagram Page URL</label>
-                                <input type="url" class="form-control" name="instagram_url" 
-                                       value="{{ settings.instagram_url|default:'' }}" 
+                                <input type="url" class="form-control" name="instagram_url" id="instagram_url"
+                                       value="{{ settings.instagram_url|default:'' }}"
                                        placeholder="https://instagram.com/yourpage" required>
-                                <small class="text-muted">URL customers will follow to verify</small>
+                                <small class="text-muted">Customers will follow this link for verification</small>
                             </div>
-                            
-                            <div class="mb-4">
+
+                            <div class="mb-3">
                                 <label for="google_review_url" class="form-label fw-medium">Google Review URL</label>
-                                <input type="url" class="form-control" name="google_review_url" 
-                                       value="{{ settings.google_review_url|default:'' }}" 
+                                <input type="url" class="form-control" name="google_review_url" id="google_review_url"
+                                       value="{{ settings.google_review_url|default:'' }}"
                                        placeholder="https://g.page/r/Cxyz/review" required>
-                                <small class="text-muted">URL for customers to leave reviews</small>
+                                <small class="text-muted">Customers will be redirected here for reviews</small>
                             </div>
                         </div>
-                        
+
                         <!-- Form Actions -->
-                        <div class="d-flex justify-content-between mt-4 pt-3 border-top">
+                        <div class="d-flex justify-content-between pt-3 border-top mt-4">
                             <button type="reset" class="btn btn-outline-secondary">
                                 <i class="fas fa-undo me-2"></i>Reset
                             </button>
@@ -222,39 +218,31 @@
                     </form>
                 </div>
             </div>
-            
-            <div class="text-center text-muted small">
+
+            <p class="text-center text-muted small mt-3">
                 <i class="fas fa-info-circle me-1"></i> Changes take effect immediately
-            </div>
+            </p>
         </div>
     </div>
 </div>
 
-<!-- JavaScript Libraries -->
+<!-- JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
-
 <script>
-// Toggle social fields visibility
-document.getElementById('require_social').addEventListener('change', function() {
+document.addEventListener('DOMContentLoaded', function () {
+    const socialToggle = document.getElementById('require_social');
     const socialFields = document.getElementById('socialFields');
-    socialFields.style.display = this.checked ? 'block' : 'none';
-    
-    // Toggle required attribute on URL fields
     const urlInputs = socialFields.querySelectorAll('input[type="url"]');
-    urlInputs.forEach(input => {
-        input.required = this.checked;
-    });
-});
 
-// Initialize tooltips
-document.addEventListener('DOMContentLoaded', function() {
-    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-    tooltipTriggerList.map(function (tooltipTriggerEl) {
-        return new bootstrap.Tooltip(tooltipTriggerEl);
-    });
+    function toggleSocialFields() {
+        const show = socialToggle.checked;
+        socialFields.style.display = show ? 'block' : 'none';
+        urlInputs.forEach(input => input.required = show);
+    }
+
+    socialToggle.addEventListener('change', toggleSocialFields);
+    toggleSocialFields(); // Initial state
 });
 </script>
-
 </body>
 </html>

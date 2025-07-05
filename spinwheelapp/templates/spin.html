@@ -2,7 +2,8 @@
 <html>
 <head>
     <title>Spin the Wheel</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- <meta name="viewport" content="width=device-width, initial-scale=1.0"> -->
+     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <style>
 
         html, body {
@@ -40,6 +41,8 @@
             width: 100%;
             overflow-x: hidden;
         } */
+
+        
 
         body {
             font-family: 'Poppins', sans-serif;
@@ -98,6 +101,13 @@
             max-width: 800px;
             padding: 2rem;
             margin: 0 auto;
+            display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    width: 100%;
+    max-width: 100%;
         }
 
         *, *::before, *::after {
@@ -139,8 +149,8 @@
 
         #wheel-container {
         position: relative;
-        width: 420px;
-        height: 420px;
+        width: min(90vw, 420px); /* Use viewport units with a max size */
+    height: min(90vw, 420px);
         margin: 0 auto 3rem;
         padding: 20px;
         background: #8B4513;
@@ -252,7 +262,7 @@
             top: 43%;
             left: 45%;
             transform-origin: center;
-            transform: rotate(var(--angle)) translateY(-150px);
+            transform: rotate(var(--angle)) translateY(-130px);
             writing-mode: vertical-rl;
             text-orientation: mixed;
             font-size: 14px;
@@ -527,6 +537,32 @@ canvas.confetti-canvas {
             z-index: -1;
         }
 
+        .whatsapp-btn {
+    background: #25D366;
+    color: white;
+    border: none;
+    padding: 12px 25px;
+    border-radius: 50px;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(37, 211, 102, 0.3);
+}
+
+.whatsapp-btn:hover {
+    background: #128C7E;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(37, 211, 102, 0.4);
+}
+
+.whatsapp-btn i {
+    font-size: 1.2rem;
+}
+
         @media (max-width: 768px) {
             
             h1 {
@@ -541,11 +577,11 @@ canvas.confetti-canvas {
             }
 
             #wheel-container {
-                width: 400px;
-                height: 400px;
-                padding: 18px;
-                
-            }
+        width: min(80vw, 400px);  /* Slightly larger than 480px breakpoint */
+        height: min(80vw, 400px); /* Maintain square aspect ratio */
+        padding: 4%;             /* Relative padding */
+        margin: 0 auto 2.5rem;   /* Adjusted margin */
+    }
 
             .segment-label {
                 transform: rotate(var(--angle)) translateY(-150px);
@@ -602,15 +638,16 @@ canvas.confetti-canvas {
             }
 
             #wheel-container {
-                width: 360px;
-                height: 360px;
-                padding: 16px;
+                width: min(85vw, 360px);
+        height: min(85vw, 360px);
+        padding: 4%;
+                
                 
             }
 
             .segment-label {
-                transform: rotate(var(--angle)) translateY(-135px);
-                font-size: 15px;
+                transform: rotate(var(--angle)) translateY(-100px);
+                font-size: 13px;
             }
 
             .segment-label.selected {
@@ -676,197 +713,285 @@ canvas.confetti-canvas {
         <form method="post" action="{% url 'process_spin' %}" id="spin-form">
             {% csrf_token %}
             <input type="hidden" name="selected_offer" id="selected-offer-input">
-            <button id="spin-button" type="button">SPIN THE WHEEL</button>
+            <button id="spin-button" type="submit">SPIN THE WHEEL</button>
         </form>
     </div>
 
-    <div id="modal">
+    <!-- <div id="modal">
         <div id="modal-content">
             <button class="close-modal" aria-label="Close" id="close-modal-button">×</button>
             🎉 Congratulations! You won: <span id="winning-offer-name"></span>!
             <div style="margin-top: 30px;">
                 <button id="claim-button">Claim Your Prize</button>
+                 
+            </div>
+        </div>
+    </div> -->
+
+    
+    <div id="modal">
+        <div id="modal-content">
+            <button class="close-modal" aria-label="Close" id="close-modal-button">×</button>
+            🎉 Congratulations! You won: <span id="winning-offer-name"></span>!
+            <div style="margin-top: 30px;">
+                <button id="whatsapp-claim-btn" class="whatsapp-btn">
+                    <i class="fab fa-whatsapp"></i> Claim via WhatsApp
+                </button>
             </div>
         </div>
     </div>
 
     <script>
-        const wheel = document.getElementById('wheel');
-        const spinButton = document.getElementById('spin-button');
-        const spinForm = document.getElementById('spin-form');
-        const segments = {{ segments|safe }};
-        const total = segments.length;
-        const anglePerSegment = 360 / total;
-        let isSpinning = false;
-        let confettiInterval;
-        let selectedOfferId = null;
+    const wheel = document.getElementById('wheel');
+    const spinButton = document.getElementById('spin-button');
+    const spinForm = document.getElementById('spin-form');
+    const segments = {{ segments|safe }};
+    const total = segments.length;
+    const anglePerSegment = 360 / total;
+    let isSpinning = false;
+    let confettiInterval;
+    let selectedOfferId = null;
 
-        // Audio elements with multiple fallback sources
-        const winSound = new Audio();
-        const spinSound = new Audio();
-        const winModalSound = new Audio();
+    // Audio elements
+    const winSound = new Audio();
+    const spinSound = new Audio();
+    const winModalSound = new Audio();
 
-        // Set up audio sources with fallbacks
-        function setupAudio() {
-            // Win sound
-            winSound.src = 'https://assets.mixkit.co/active_storage/sfx/600/600-preview.mp3';
-            winSound.type = 'audio/mpeg';
-            winSound.preload = 'auto';
-            winSound.load();
+    // Set up audio sources
+    function setupAudio() {
+        // Win sound
+        winSound.src = 'https://assets.mixkit.co/active_storage/sfx/600/600-preview.mp3';
+        winSound.type = 'audio/mpeg';
+        winSound.preload = 'auto';
+        winSound.load();
 
-            // Spin sound
-            spinSound.src =  'https://assets.mixkit.co/active_storage/sfx/1930/1930-preview.mp3';
-            spinSound.type = 'audio/mpeg';
-            spinSound.preload = 'auto';
-            spinSound.load();
+        // Spin sound
+        spinSound.src = 'https://assets.mixkit.co/active_storage/sfx/1930/1930-preview.mp3';
+        spinSound.type = 'audio/mpeg';
+        spinSound.preload = 'auto';
+        spinSound.load();
 
-            // Win modal sound
-            winModalSound.src = 'https://assets.mixkit.co/active_storage/sfx/2015/2015-preview.mp3';
-            winModalSound.type = 'audio/mpeg';
-            winModalSound.preload = 'auto';
-            winModalSound.load();
+        // Win modal sound
+        winModalSound.src = 'https://assets.mixkit.co/active_storage/sfx/2015/2015-preview.mp3';
+        winModalSound.type = 'audio/mpeg';
+        winModalSound.preload = 'auto';
+        winModalSound.load();
+    }
+
+    // Load Font Awesome for WhatsApp icon if not already loaded
+    function loadFontAwesome() {
+        if (!document.querySelector('link[href*="font-awesome"]')) {
+            const faLink = document.createElement('link');
+            faLink.rel = 'stylesheet';
+            faLink.href = 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css';
+            document.head.appendChild(faLink);
         }
+    }
 
-        // Call setup when page loads
-        setupAudio();
-
-        // Set wheel background
+    // Set wheel background
+    function setupWheel() {
         let gradientParts = segments.map((seg, i) => {
             const start = i * anglePerSegment;
             const end = start + anglePerSegment;
             return `${seg.color} ${start}deg ${end}deg`;
         });
         wheel.style.background = `conic-gradient(${gradientParts.join(', ')})`;
+    }
 
-        function weightedRandom(segments) {
-            const totalWeight = segments.reduce((sum, seg) => sum + seg.percentage, 0);
-            let rand = Math.random() * totalWeight;
-            for (let i = 0; i < segments.length; i++) {
-                rand -= segments[i].percentage;
-                if (rand <= 0) return i;
-            }
-            return segments.length - 1;
+    // Weighted random selection based on percentages
+    function weightedRandom(segments) {
+        const totalWeight = segments.reduce((sum, seg) => sum + seg.percentage, 0);
+        let rand = Math.random() * totalWeight;
+        for (let i = 0; i < segments.length; i++) {
+            rand -= segments[i].percentage;
+            if (rand <= 0) return i;
         }
+        return segments.length - 1;
+    }
 
-        function closeModal() {
-            document.getElementById('modal').style.display = 'none';
-            clearInterval(confettiInterval);
-            document.querySelectorAll('.segment-label').forEach(el => {
-                el.classList.remove('selected');
-            });
+    function closeModal() {
+        document.getElementById('modal').style.display = 'none';
+        clearInterval(confettiInterval);
+        document.querySelectorAll('.segment-label').forEach(el => {
+            el.classList.remove('selected');
+        });
+    }
+
+    // Unlock audio on mobile devices
+    async function unlockAudio() {
+        try {
+            const AudioContext = window.AudioContext || window.webkitAudioContext;
+            const audioContext = new AudioContext();
+            const oscillator = audioContext.createOscillator();
+            oscillator.type = 'sine';
+            oscillator.frequency.setValueAtTime(1, audioContext.currentTime);
+            oscillator.connect(audioContext.destination);
+            oscillator.start();
+            oscillator.stop(audioContext.currentTime + 0.001);
+            return true;
+        } catch (e) {
+            console.log("Audio unlock failed", e);
+            return false;
         }
+    }
 
-        // Improved audio unlock function
-        async function unlockAudio() {
-            try {
-                const AudioContext = window.AudioContext || window.webkitAudioContext;
-                const audioContext = new AudioContext();
-                const oscillator = audioContext.createOscillator();
-                oscillator.type = 'sine';
-                oscillator.frequency.setValueAtTime(1, audioContext.currentTime);
-                oscillator.connect(audioContext.destination);
-                oscillator.start();
-                oscillator.stop(audioContext.currentTime + 0.001);
-                return true;
-            } catch (e) {
-                console.log("Audio unlock failed", e);
-                return false;
-            }
-        }
-
-        spinButton.addEventListener('click', async function(e) {
-            if (isSpinning) return;
-            isSpinning = true;
+    // Initialize WhatsApp claim button
+    function initWhatsAppClaim() {
+        const whatsappBtn = document.getElementById('whatsapp-claim-btn');
+        
+        whatsappBtn.addEventListener('click', function(e) {
             e.preventDefault();
-            spinButton.disabled = true;
-
-            // Unlock audio first
-            await unlockAudio();
-
-            const chosenIndex = weightedRandom(segments);
-            selectedOfferId = segments[chosenIndex].id;
-            const spins = 5;
-            const rotateTo = spins * 360 + (chosenIndex * anglePerSegment) + (anglePerSegment / 2);
-            wheel.style.transition = 'transform 4s cubic-bezier(0.17, 0.67, 0.12, 0.99)';
-            wheel.style.transform = `rotate(-${rotateTo}deg)`;
-
-            // Play spinning sound effect
-            try {
-                spinSound.currentTime = 0;
-                spinSound.volume = 0.4;
-                spinSound.loop = true;
-                await spinSound.play();
-            } catch (e) {
-                console.log("Spin sound play failed:", e);
-            }
-
-            setTimeout(async () => {
-                // Highlight the selected segment
-                document.querySelectorAll('.segment-label').forEach((el, i) => {
-                    el.classList.toggle('selected', i === chosenIndex);
-                });
-
-                // Set the selected offer in the hidden input
-                document.getElementById('selected-offer-input').value = selectedOfferId;
-
-                // Stop and play winning sound
-                try {
-                    spinSound.pause();
-                    spinSound.currentTime = 0;
-                    winSound.currentTime = 0;
-                    winSound.volume = 0.6;
-                    await winSound.play();
-                } catch (e) {
-                    console.log("Win sound play failed:", e);
-                }
-
-                // Confetti with multiple bursts
-                confettiInterval = setInterval(() => {
-                    confetti({
-                        particleCount: 100,
-                        spread: 70,
-                        origin: { y: 0.6 }
-                    });
-                }, 300);
-
-                // Show modal with the prize
-                document.getElementById('winning-offer-name').textContent = segments[chosenIndex].name;
-                document.getElementById('modal').style.display = 'flex';
-                
-                try {
-                    winModalSound.currentTime = 0;
-                    winModalSound.volume = 0.5;
-                    await winModalSound.play();
-                } catch (e) {
-                    console.log("Modal sound play failed:", e);
-                }
-
-            }, 4100);
             
-            // Reset spinning state after animation completes
-            setTimeout(() => {
-                isSpinning = false;
-                spinButton.disabled = false;
-            }, 4100);
-        });
+            const offerName = document.getElementById('winning-offer-name').textContent;
+            const shopName = "{{ shop.shop_name|escapejs }}";
+            const shopPhone = "{{ shop.whatsapp_number|default:'919876543210'|escapejs }}".replace(/\D/g, '');
+            
+            if (!shopPhone) {
+                alert("This shop hasn't set up WhatsApp claims yet. Please contact them directly.");
+                return;
+            }
 
-        // Handle form submission when claim button is clicked
-        document.getElementById('claim-button').addEventListener('click', function(e) {
-            e.preventDefault();
+            const userData = {
+                name: "{{ entry_data.name|escapejs }}",
+                phone: "{{ entry_data.phone|escapejs }}",
+                bill: "{{ entry_data.bill_number|default:'N/A'|escapejs }}"
+            };
+
+            const message = `🎉 Prize Claim Notification 🎉\n\n` +
+                           `*Shop:* ${shopName}\n` +
+                           `*Prize Won:* ${offerName}\n\n` +
+                           `*Customer Details:*\n` +
+                           `- Name: ${userData.name}\n` +
+                           `- Phone: ${userData.phone}\n` +
+                           `- Bill No: ${userData.bill}\n\n` +
+                           `Please advise how to claim this prize.`;
+
+            // Check if mobile device
+            const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+            
+            if (isMobile) {
+                // First try with iframe method (works on most devices)
+                const iframe = document.createElement('iframe');
+                iframe.style.display = 'none';
+                iframe.src = `whatsapp://send?phone=${shopPhone}&text=${encodeURIComponent(message)}`;
+                document.body.appendChild(iframe);
+                
+                // Fallback to web if the app doesn't open
+                setTimeout(() => {
+                    document.body.removeChild(iframe);
+                    window.location.href = `https://wa.me/${shopPhone}?text=${encodeURIComponent(message)}`;
+                }, 500);
+            } else {
+                // For desktop, use web version
+                window.open(`https://web.whatsapp.com/send?phone=${shopPhone}&text=${encodeURIComponent(message)}`, '_blank');
+            }
+            
+            // Submit the form data to server
             if (selectedOfferId) {
                 document.getElementById('selected-offer-input').value = selectedOfferId;
                 spinForm.submit();
             }
+            
+            // Close modal after short delay
+            setTimeout(closeModal, 1500);
         });
+    }
 
-        // Also allow closing the modal to submit
-        document.getElementById('close-modal-button').addEventListener('click', function(e) {
-            e.preventDefault();
-            if (selectedOfferId) {
-                document.getElementById('selected-offer-input').value = selectedOfferId;
-                spinForm.submit();
+    // Handle spin button click
+    spinButton.addEventListener('click', async function(e) {
+        if (isSpinning) return;
+        isSpinning = true;
+        e.preventDefault();
+        spinButton.disabled = true;
+
+        // Unlock audio first
+        await unlockAudio();
+
+        const chosenIndex = weightedRandom(segments);
+        selectedOfferId = segments[chosenIndex].id;
+        const spins = 5;
+        const rotateTo = spins * 360 + (chosenIndex * anglePerSegment) + (anglePerSegment / 2);
+        wheel.style.transition = 'transform 4s cubic-bezier(0.17, 0.67, 0.12, 0.99)';
+        wheel.style.transform = `rotate(-${rotateTo}deg)`;
+
+        // Play spinning sound effect
+        try {
+            spinSound.currentTime = 0;
+            spinSound.volume = 0.4;
+            spinSound.loop = true;
+            await spinSound.play();
+        } catch (e) {
+            console.log("Spin sound play failed:", e);
+        }
+
+        setTimeout(async () => {
+            // Highlight the selected segment
+            document.querySelectorAll('.segment-label').forEach((el, i) => {
+                el.classList.toggle('selected', i === chosenIndex);
+            });
+
+            // Set the selected offer in the hidden input
+            document.getElementById('selected-offer-input').value = selectedOfferId;
+
+            // Stop and play winning sound
+            try {
+                spinSound.pause();
+                spinSound.currentTime = 0;
+                winSound.currentTime = 0;
+                winSound.volume = 0.6;
+                await winSound.play();
+            } catch (e) {
+                console.log("Win sound play failed:", e);
             }
-        });
-    </script>
+
+            // Confetti with multiple bursts
+            confettiInterval = setInterval(() => {
+                confetti({
+                    particleCount: 100,
+                    spread: 70,
+                    origin: { y: 0.6 }
+                });
+            }, 300);
+
+            // Show modal with the prize
+            document.getElementById('winning-offer-name').textContent = segments[chosenIndex].name;
+            document.getElementById('modal').style.display = 'flex';
+
+            try {
+                winModalSound.currentTime = 0;
+                winModalSound.volume = 0.5;
+                await winModalSound.play();
+            } catch (e) {
+                console.log("Modal sound play failed:", e);
+            }
+
+        }, 4100);
+        
+        // Reset spinning state after animation completes
+        setTimeout(() => {
+            isSpinning = false;
+            spinButton.disabled = false;
+        }, 4100);
+    });
+
+    // Also allow closing the modal to submit
+    document.getElementById('close-modal-button').addEventListener('click', function(e) {
+        e.preventDefault();
+        closeModal();
+        if (selectedOfferId) {
+            document.getElementById('selected-offer-input').value = selectedOfferId;
+            spinForm.submit();
+        }
+    });
+
+    // Initialize everything when page loads
+    document.addEventListener('DOMContentLoaded', function() {
+        setupAudio();
+        loadFontAwesome();
+        setupWheel();
+        initWhatsAppClaim();
+    });
+</script>
 </body>
 </html>
+

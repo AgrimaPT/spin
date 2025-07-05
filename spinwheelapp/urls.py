@@ -21,8 +21,10 @@ urlpatterns = [
     path('spin-entries/', views.spin_entries, name='spin_entries'),
     #path('<str:shop_code>/spin-entries/', views.spin_entries, name='spin_entries'),
     path('verify/<str:shop_code>/', views.social_verification, name='social_verification'),
+    # urls.py
+
+    path('scratch-card/', views.scratch_card, name='scratch_card'),
+    # path('scratch-card/success/', views.scratch_card_success, name='scratch_card_success'),
     
-
-
     
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

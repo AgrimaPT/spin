@@ -167,60 +167,208 @@ def delete_offer(request, offer_id):
 
 
 
+# def qr_entry_form(request, shop_code):
+#     shop = get_object_or_404(ShopProfile, shop_code=shop_code)
+    
+#     # Get or create shop settings
+#     shop_settings, created = ShopSettings.objects.get_or_create(shop=shop)
+    
+#     if request.method == 'POST':
+#         form = SpinEntryForm(request.POST, require_bill=shop_settings.require_bill_number)
+#         if form.is_valid():
+#             entry_data = {
+#                 'name': form.cleaned_data['name'],
+#                 'phone': form.cleaned_data['phone'],
+#                 'shop_code': shop_code,
+#                 'verified': True
+#             }
+            
+#             # Add bill_number if required and provided
+#             if shop_settings.require_bill_number and 'bill_number' in form.cleaned_data:
+#                 entry_data['bill_number'] = form.cleaned_data['bill_number']
+            
+#             request.session['entry_data'] = entry_data
+#             request.session.save()
+            
+#             # Redirect to social verification if enabled, otherwise to spin page
+#             # if shop_settings.require_social_verification:
+#             #     return redirect('social_verification', shop_code=shop_code)
+#             # return redirect('spin_page')
+#             if shop_settings.require_social_verification:
+#                 return redirect('social_verification', shop_code=shop_code)
+#             else:
+#                 # Create SpinEntry immediately
+#                 spin_entry = SpinEntry.objects.create(
+#                     name=entry_data['name'],
+#                     phone=entry_data['phone'],
+#                     shop=shop,
+#                     bill_number=entry_data.get('bill_number', ''),
+#                     offer=None  # Will be set after spinning
+#                 )
+#                 request.session['temp_spin_id'] = spin_entry.id
+#                 request.session.modified = True
+#                 return redirect('spin_page')
+
+#         else:
+#             messages.error(request, "Please correct the errors below")
+#     else:
+#         form = SpinEntryForm(initial={'shop_code': shop_code}, require_bill=shop_settings.require_bill_number)
+    
+#     return render(request, 'form.html', {  # Changed template name to match new design
+#         'form': form,
+#         'shop': shop,
+#         'require_bill': shop_settings.require_bill_number,
+#         'shop_settings': shop_settings,  # Pass the full settings object
+#         'require_social_verification': shop_settings.require_social_verification  # Added for progress steps
+#     })
+
+
+
+# def qr_entry_form(request, shop_code):
+#     shop = get_object_or_404(ShopProfile, shop_code=shop_code)
+#     shop_settings, created = ShopSettings.objects.get_or_create(shop=shop)
+    
+#     if request.method == 'POST':
+#         form = SpinEntryForm(request.POST, require_bill=shop_settings.require_bill_number)
+#         if form.is_valid():
+#             entry_data = {
+#                 'name': form.cleaned_data['name'],
+#                 'phone': form.cleaned_data['phone'],
+#                 'shop_code': shop_code,
+#                 'verified': True
+#             }
+            
+#             if shop_settings.require_bill_number and 'bill_number' in form.cleaned_data:
+#                 entry_data['bill_number'] = form.cleaned_data['bill_number']
+            
+#             request.session['entry_data'] = entry_data
+#             request.session.save()
+            
+#             # Create temporary entry (for both game types)
+#             spin_entry = SpinEntry.objects.create(
+#                 name=entry_data['name'],
+#                 phone=entry_data['phone'],
+#                 shop=shop,
+#                 bill_number=entry_data.get('bill_number', ''),
+#                 offer=None
+#             )
+#             request.session['temp_spin_id'] = spin_entry.id
+            
+#             # ALWAYS check social verification first if enabled
+#             if shop_settings.require_social_verification:
+#                 # Clear any existing verification flag
+#                 if 'social_verified' in request.session:
+#                     del request.session['social_verified']
+#                 return redirect('social_verification', shop_code=shop_code)
+            
+#             # Only proceed directly to game if social verification is NOT required
+#             if shop_settings.game_type == GameType.SPIN_WHEEL:
+#                 return redirect('spin_page')
+#             else:
+#                 return redirect('scratch_card')
+
+#         else:
+#             messages.error(request, "Please correct the errors below")
+#     else:
+#         form = SpinEntryForm(initial={'shop_code': shop_code}, require_bill=shop_settings.require_bill_number)
+    
+#     return render(request, 'form.html', {
+#         'form': form,
+#         'shop': shop,
+#         'shop_settings': shop_settings,
+#         'require_bill': shop_settings.require_bill_number,
+#         'require_social_verification': shop_settings.require_social_verification,
+#         'game_type': shop_settings.get_game_type_display()
+#     })
+
+
 def qr_entry_form(request, shop_code):
     shop = get_object_or_404(ShopProfile, shop_code=shop_code)
-    
-    # Get or create shop settings
     shop_settings, created = ShopSettings.objects.get_or_create(shop=shop)
     
     if request.method == 'POST':
-        form = SpinEntryForm(request.POST, require_bill=shop_settings.require_bill_number)
+        form = SpinEntryForm(request.POST, require_bill=shop_settings.require_bill_number, shop=shop)
         if form.is_valid():
-            entry_data = {
-                'name': form.cleaned_data['name'],
-                'phone': form.cleaned_data['phone'],
-                'shop_code': shop_code,
-                'verified': True
-            }
+            # Create the SpinEntry manually since we're using forms.Form
+            spin_entry = SpinEntry(
+                name=form.cleaned_data['name'],
+                phone=form.cleaned_data['phone'],
+                shop=shop,
+                bill_number=form.cleaned_data['bill_number'] if shop_settings.require_bill_number else None
+            )
             
-            # Add bill_number if required and provided
-            if shop_settings.require_bill_number and 'bill_number' in form.cleaned_data:
-                entry_data['bill_number'] = form.cleaned_data['bill_number']
-            
-            request.session['entry_data'] = entry_data
-            request.session.save()
-            
-            # Redirect to social verification if enabled, otherwise to spin page
-            # if shop_settings.require_social_verification:
-            #     return redirect('social_verification', shop_code=shop_code)
-            # return redirect('spin_page')
-            if shop_settings.require_social_verification:
-                return redirect('social_verification', shop_code=shop_code)
-            else:
-                # Create SpinEntry immediately
-                spin_entry = SpinEntry.objects.create(
-                    name=entry_data['name'],
-                    phone=entry_data['phone'],
-                    shop=shop,
-                    bill_number=entry_data.get('bill_number', ''),
-                    offer=None  # Will be set after spinning
-                )
+            try:
+                spin_entry.save()
+                
+                # Store the entry ID in session
                 request.session['temp_spin_id'] = spin_entry.id
-                request.session.modified = True
-                return redirect('spin_page')
+                request.session.save()
+                
+                # Handle social verification if required
+                if shop_settings.require_social_verification:
+                    if 'social_verified' in request.session:
+                        del request.session['social_verified']
+                    return redirect('social_verification', shop_code=shop_code)
+                
+                # Redirect to appropriate game
+                if shop_settings.game_type == 'SW':
+                    return redirect('spin_page')
+                else:
+                    return redirect('scratch_card')
+                    
+            except IntegrityError as e:
+                if 'unique_bill_per_shop' in str(e):
+                    messages.error(request, "This bill number has already been used for this shop")
+                else:
+                    messages.error(request, f"An error occurred while saving your entry: {str(e)}")
+                return render(request, 'form.html', {
+                    'form': form,
+                    'shop': shop,
+                    'shop_settings': shop_settings,
+                })
 
         else:
             messages.error(request, "Please correct the errors below")
     else:
-        form = SpinEntryForm(initial={'shop_code': shop_code}, require_bill=shop_settings.require_bill_number)
+        form = SpinEntryForm(initial={'shop_code': shop_code}, 
+                           require_bill=shop_settings.require_bill_number,
+                           shop=shop)
     
-    return render(request, 'form.html', {  # Changed template name to match new design
+    return render(request, 'form.html', {
         'form': form,
         'shop': shop,
+        'shop_settings': shop_settings,
         'require_bill': shop_settings.require_bill_number,
-        'shop_settings': shop_settings,  # Pass the full settings object
-        'require_social_verification': shop_settings.require_social_verification  # Added for progress steps
+        'require_social_verification': shop_settings.require_social_verification,
+        'game_type': shop_settings.get_game_type_display()
     })
+
+# from django import forms
+# from .models import SpinEntry
+
+# class SpinEntryForm(forms.ModelForm):
+#     class Meta:
+#         model = SpinEntry
+#         fields = ['name', 'phone', 'bill_number']
+    
+#     def __init__(self, *args, **kwargs):
+#         self.require_bill = kwargs.pop('require_bill', False)
+#         self.shop = kwargs.pop('shop', None)
+#         super().__init__(*args, **kwargs)
+        
+#         if not self.require_bill:
+#             self.fields['bill_number'].required = False
+    
+#     def clean_bill_number(self):
+#         bill_number = self.cleaned_data.get('bill_number')
+#         if self.require_bill and not bill_number:
+#             raise forms.ValidationError("Bill number is required")
+        
+#         if bill_number and self.shop:
+#             if SpinEntry.objects.filter(shop=self.shop, bill_number=bill_number).exists():
+#                 raise forms.ValidationError("This bill number has already been used")
+        
+#         return bill_number
 
 def build_segments(offers):
     total = len(offers)
@@ -238,18 +386,18 @@ def build_segments(offers):
 
     return segments
 
-
 @login_required
 def spin_page(request):
-    # Check session data exists
-    entry_data = request.session.get('entry_data')
-    if not entry_data or not entry_data.get('verified'):
-        messages.error(request, "Please complete the entry form first")
-        return redirect('qr_entry_form', shop_code=entry_data.get('shop_code', ''))
-
+    # Check if we have a temporary spin entry ID
+    temp_spin_id = request.session.get('temp_spin_id')
+    if not temp_spin_id:
+        messages.error(request, "Session expired or invalid. Please start over.")
+        return redirect('home')  # Or redirect to your entry form
+    
     try:
-        # Get shop and settings
-        shop = ShopProfile.objects.get(shop_code=entry_data['shop_code'])
+        # Get the spin entry
+        spin_entry = SpinEntry.objects.get(id=temp_spin_id)
+        shop = spin_entry.shop
         shop_settings = ShopSettings.objects.get(shop=shop)
         
         # Check social verification if required
@@ -257,18 +405,20 @@ def spin_page(request):
             messages.info(request, "Please complete social verification first")
             return redirect('social_verification', shop_code=shop.shop_code)
             
+    except SpinEntry.DoesNotExist:
+        messages.error(request, "Invalid spin entry")
+        return redirect('home')
     except ShopProfile.DoesNotExist:
         messages.error(request, "Invalid shop")
-        return redirect('qr_entry_form', shop_code=entry_data.get('shop_code', ''))
+        return redirect('home')
     except ShopSettings.DoesNotExist:
-        # Handle case where settings don't exist (shouldn't happen with get_or_create)
         shop_settings = ShopSettings.objects.create(shop=shop)
     
-    # Existing spin wheel logic
+    # Get offers for the shop
     offers = Offer.objects.filter(shop=shop)
     if not offers.exists():
         messages.error(request, "No offers available for this shop")
-        return redirect('qr_entry_form', shop_code=entry_data.get('shop_code', ''))
+        return redirect('home')
     
     # Calculate segments
     total_segments = offers.count()
@@ -296,7 +446,7 @@ def spin_page(request):
         'segments': segments,
         'angle_per_segment': angle_per_segment,
         'shop': shop,
-        'shop_settings': shop_settings,  # Pass to template if needed
+        'shop_settings': shop_settings,
     })
 
 
@@ -352,6 +502,8 @@ def settings_view(request):
 
     if request.method == 'POST':
         try:
+            game_type = request.POST.get('game_type', 'SW')  # Default to Spin Wheel
+            settings.game_type = game_type
             settings.require_bill_number = 'require_bill_number' in request.POST
             settings.require_social_verification = 'require_social_verification' in request.POST
             settings.require_screenshot = 'require_screenshot' in request.POST
@@ -466,16 +618,93 @@ def spin_entries(request):
         return redirect('offer_list')
     
     entries = SpinEntry.objects.filter(shop=shop).order_by('-timestamp')
-    return render(request, 'spin_entries.html', {'entries': entries})
+    return render(request, 'spin_entries.html', {'entries': entries,'shop': shop})
 
+
+
+# from django.core.files.storage import FileSystemStorage
+# from django.utils import timezone
+# from datetime import timedelta
+
+# from django.core.files.base import ContentFile
+# import base64
+
+# def social_verification(request, shop_code):
+#     shop = get_object_or_404(ShopProfile, shop_code=shop_code)
+#     settings = get_object_or_404(ShopSettings, shop=shop)
+    
+#     # Get entry data from session
+#     entry_data = request.session.get('entry_data', {})
+#     if not entry_data or 'phone' not in entry_data:
+#         messages.error(request, "Session expired. Please start over.")
+#         return redirect('qr_entry_form', shop_code=shop_code)
+    
+#     # Check if already verified
+#     if request.session.get('social_verified'):
+#         return redirect('spin_page')
+
+#     if request.method == 'POST':
+#         try:
+#             # Create temporary spin entry first
+#             spin_entry = SpinEntry.objects.create(
+#                 name=entry_data['name'],
+#                 phone=entry_data['phone'],
+#                 shop=shop,
+#                 bill_number=entry_data.get('bill_number', ''),
+#                 offer=None  # Will be set after spinning
+#             )
+
+#             # Handle file uploads if screenshot verification is required
+#             if settings.require_screenshot:
+#                 if not all(k in request.FILES for k in ['instagram_screenshot', 'google_screenshot']):
+#                     messages.error(request, "Both screenshots are required")
+#                     spin_entry.delete()  # Clean up the temporary entry
+#                     return redirect('social_verification', shop_code=shop_code)
+                
+#                 fs = FileSystemStorage()
+#                 # Save files to media storage immediately
+#                 instagram_file = request.FILES['instagram_screenshot']
+#                 google_file = request.FILES['google_screenshot']
+                
+#                 instagram_filename = fs.save(
+#                     f'verifications/instagram_{spin_entry.id}_{instagram_file.name}', 
+#                     instagram_file
+#                 )
+#                 google_filename = fs.save(
+#                     f'verifications/google_{spin_entry.id}_{google_file.name}', 
+#                     google_file
+#                 )
+                
+#                 # Create verification record
+#                 SocialVerification.objects.create(
+#                     entry=spin_entry,
+#                     instagram_screenshot=instagram_filename,
+#                     google_review_screenshot=google_filename
+#                 )
+
+#             # Mark as verified in session and store spin entry ID
+#             request.session['social_verified'] = True
+#             request.session['temp_spin_id'] = spin_entry.id
+#             request.session.modified = True
+            
+#             return redirect('spin_page')
+            
+#         except Exception as e:
+#             messages.error(request, f"Error processing verification: {str(e)}")
+#             return redirect('social_verification', shop_code=shop_code)
+    
+#     return render(request, 'social_verification.html', {
+#         'shop': shop,
+#         'settings': settings,
+#         'require_screenshot': settings.require_screenshot
+#     })
 
 
 from django.core.files.storage import FileSystemStorage
-from django.utils import timezone
-from datetime import timedelta
-
-from django.core.files.base import ContentFile
-import base64
+from django.shortcuts import redirect, get_object_or_404, render
+from django.contrib import messages
+from .models import ShopProfile, ShopSettings, SpinEntry, SocialVerification, GameType
+import random
 
 def social_verification(request, shop_code):
     shop = get_object_or_404(ShopProfile, shop_code=shop_code)
@@ -489,17 +718,21 @@ def social_verification(request, shop_code):
     
     # Check if already verified
     if request.session.get('social_verified'):
-        return redirect('spin_page')
+        # Redirect to appropriate game based on settings
+        if settings.game_type == GameType.SPIN_WHEEL:
+            return redirect('spin_page')
+        else:
+            return redirect('scratch_card')
 
     if request.method == 'POST':
         try:
-            # Create temporary spin entry first
+            # Create temporary entry (works for both game types)
             spin_entry = SpinEntry.objects.create(
                 name=entry_data['name'],
                 phone=entry_data['phone'],
                 shop=shop,
                 bill_number=entry_data.get('bill_number', ''),
-                offer=None  # Will be set after spinning
+                offer=None  # Will be set after game interaction
             )
 
             # Handle file uploads if screenshot verification is required
@@ -530,12 +763,16 @@ def social_verification(request, shop_code):
                     google_review_screenshot=google_filename
                 )
 
-            # Mark as verified in session and store spin entry ID
+            # Mark as verified in session and store entry ID
             request.session['social_verified'] = True
             request.session['temp_spin_id'] = spin_entry.id
             request.session.modified = True
             
-            return redirect('spin_page')
+            # Redirect to appropriate game based on settings
+            if settings.game_type == GameType.SPIN_WHEEL:
+                return redirect('spin_page')
+            else:
+                return redirect('scratch_card')
             
         except Exception as e:
             messages.error(request, f"Error processing verification: {str(e)}")
@@ -544,5 +781,51 @@ def social_verification(request, shop_code):
     return render(request, 'social_verification.html', {
         'shop': shop,
         'settings': settings,
-        'require_screenshot': settings.require_screenshot
+        'require_screenshot': settings.require_screenshot,
+        'game_type': settings.get_game_type_display()  # Add to template context
+    })
+
+# views.py
+from django.core import serializers
+import json
+from django.http import JsonResponse
+
+def scratch_card(request):
+    shop = request.user.shopprofile
+    offers = Offer.objects.filter(shop=shop)
+    
+    # Get the temporary entry
+    temp_spin_id = request.session.get('temp_spin_id')
+    if not temp_spin_id:
+        return redirect('qr_entry_form', shop_code=shop.shop_code)
+    
+    # Select a random offer (weighted by percentage)
+    total_weight = sum(o.percentage for o in offers)
+    rand = random.uniform(0, total_weight)
+    current = 0
+    selected_offer = None
+    
+    for offer in offers:
+        current += offer.percentage
+        if rand <= current:
+            selected_offer = offer
+            break
+    
+    if request.method == 'POST':
+        # Update the entry with the selected offer
+        SpinEntry.objects.filter(id=temp_spin_id).update(offer=selected_offer)
+        
+        # Clear session data
+        if 'temp_spin_id' in request.session:
+            del request.session['temp_spin_id']
+        if 'entry_data' in request.session:
+            del request.session['entry_data']
+        
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({'status': 'success'})
+        return redirect('qr_entry_form', shop_code=shop.shop_code)
+    
+    return render(request, 'scratch_card.html', {
+        'selected_offer': selected_offer,
+        'shop': shop
     })

@@ -205,10 +205,10 @@
     {% if offers %}
     <div class="mt-3 text-end">
         <small class="text-muted">
-            Total Probability: {{ total_percentage|floatformat:2 }}%
+            
             {% if total_percentage != 100 %}
             <span class="text-danger ms-2">
-                <i class="fas fa-exclamation-triangle"></i> Should total 100%
+                <i class="fas fa-exclamation-triangle"></i> Total Probability Should be 100.
             </span>
             {% endif %}
         </small>

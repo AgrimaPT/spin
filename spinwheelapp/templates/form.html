@@ -5,6 +5,7 @@
 
 {% block content %}
 <div class="entry-container">
+    
     <div class="entry-card">
         <div class="entry-header">
             <h2 class="entry-title">Enter Your Details</h2>
@@ -82,23 +83,25 @@
     </div>
 </div>
 
+
 <style>
     :root {
         --primary-color: #4361ee;
         --success-color: #4BB543;
         --error-color: #dc3545;
-        --light-gray: #f8f9fa;
         --border-radius: 12px;
         --box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
     }
-
+    
+    /* Base styles optimized for mobile */
     .entry-container {
         min-height: 100vh;
         display: flex;
         align-items: center;
         justify-content: center;
-        padding: 2rem;
-        background-color: var(--light-gray);
+        padding: 1rem;
+        width: 100%;
+        box-sizing: border-box;
     }
 
     .entry-card {
@@ -106,62 +109,67 @@
         border-radius: var(--border-radius);
         box-shadow: var(--box-shadow);
         width: 100%;
-        max-width: 500px;
-        overflow: hidden;
+        max-width: 600px; /* Increased max width */
+        padding: 0;
     }
 
     .entry-header {
-        padding: 2rem;
+        padding: 2.5rem 2rem 2rem;
         text-align: center;
         background: linear-gradient(135deg, var(--primary-color), #3a0ca3);
         color: white;
+        border-radius: var(--border-radius) var(--border-radius) 0 0;
     }
 
     .entry-title {
         font-weight: 700;
-        margin-bottom: 0.5rem;
-        font-size: 1.8rem;
+        margin-bottom: 0.8rem;
+        font-size: 2rem; /* Larger title */
+        line-height: 1.3;
     }
 
     .entry-subtitle {
         opacity: 0.9;
-        margin-bottom: 1.5rem;
+        margin-bottom: 2rem;
+        font-size: 1.2rem; /* Larger subtitle */
     }
 
     .progress-steps {
         display: flex;
         justify-content: center;
         margin-top: 1.5rem;
+        gap: 2rem; /* More space between steps */
     }
 
     .step {
         display: flex;
         flex-direction: column;
         align-items: center;
-        padding: 0 1.5rem;
         position: relative;
+        min-width: 70px; /* Wider steps */
     }
 
     .step:not(:last-child):after {
         content: '';
         position: absolute;
-        top: 15px;
-        right: -20px;
-        width: 40px;
+        top: 25px; /* Better centered */
+        right: -2rem;
+        width: 2rem;
         height: 2px;
         background: rgba(255, 255, 255, 0.3);
     }
 
     .step-number {
-        width: 30px;
-        height: 30px;
+        width: 45px; /* Larger circles */
+        height: 45px;
         border-radius: 50%;
         background: rgba(255, 255, 255, 0.2);
         display: flex;
         align-items: center;
         justify-content: center;
-        margin-bottom: 0.5rem;
+        margin-bottom: 0.8rem;
         font-weight: 600;
+        font-size: 1.2rem; /* Larger numbers */
     }
 
     .step.active .step-number {
@@ -170,18 +178,19 @@
     }
 
     .step-text {
-        font-size: 0.85rem;
+        font-size: 1rem; /* Larger step text */
         opacity: 0.8;
+        white-space: nowrap;
     }
 
     .entry-body {
-        padding: 2rem;
+        padding: 2.5rem 2rem; /* More padding */
     }
 
     .entry-form {
         display: flex;
         flex-direction: column;
-        gap: 1.5rem;
+        gap: 2rem; /* More space between form elements */
     }
 
     .form-group {
@@ -190,35 +199,37 @@
 
     .form-label {
         display: block;
-        margin-bottom: 0.5rem;
+        margin-bottom: 1rem; /* More space below labels */
         font-weight: 600;
         color: #495057;
+        font-size: 1.2rem; /* Larger labels */
     }
 
     .form-label i {
-        margin-right: 8px;
+        margin-right: 12px; /* More space for icons */
         color: var(--primary-color);
+        font-size: 1.2rem; /* Larger icons */
     }
 
     .form-control {
         width: 100%;
-        padding: 0.8rem 1rem;
+        padding: 1.2rem; /* Larger input fields */
         border: 1px solid #ced4da;
         border-radius: var(--border-radius);
-        font-size: 1rem;
+        font-size: 1.2rem; /* Larger input text */
         transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
     }
 
     .form-control:focus {
         border-color: var(--primary-color);
         outline: 0;
-        box-shadow: 0 0 0 0.2rem rgba(67, 97, 238, 0.25);
+        box-shadow: 0 0 0 0.3rem rgba(67, 97, 238, 0.25); /* More visible focus */
     }
 
     .form-error {
         color: var(--error-color);
-        font-size: 0.85rem;
-        margin-top: 0.5rem;
+        font-size: 1rem; /* Larger error text */
+        margin-top: 0.8rem; /* More space above errors */
     }
 
     .required {
@@ -227,64 +238,98 @@
 
     .form-footer {
         text-align: center;
-        margin-top: 1rem;
+        margin-top: 2rem; /* More space above button */
     }
 
     .btn-submit {
         width: 100%;
-        padding: 0.8rem;
+        padding: 1.3rem; /* Larger button */
         background: var(--primary-color);
         color: white;
         border: none;
         border-radius: var(--border-radius);
-        font-size: 1rem;
+        font-size: 1.3rem; /* Larger button text */
         font-weight: 600;
         cursor: pointer;
         transition: all 0.3s ease;
-        box-shadow: 0 4px 15px rgba(67, 97, 238, 0.3);
     }
 
     .btn-submit:hover {
         background: #3a56e8;
-        transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(67, 97, 238, 0.4);
     }
 
     .btn-submit i {
-        margin-left: 8px;
+        margin-left: 12px; /* More space for icon */
     }
 
     .form-note {
-        margin-top: 1rem;
+        margin-top: 1.5rem;
         color: #6c757d;
-        font-size: 0.85rem;
+        font-size: 1rem; /* Larger note text */
     }
 
     .form-note i {
-        margin-right: 5px;
+        margin-right: 8px;
         color: var(--success-color);
     }
 
+    /* Mobile-specific adjustments */
     @media (max-width: 768px) {
         .entry-container {
-            padding: 1rem;
+            padding: 0;
+            align-items: flex-start;
+        }
+        
+        .entry-card {
+            border-radius: 0;
+            box-shadow: none;
+            max-width: 100%;
         }
         
         .entry-header {
-            padding: 1.5rem 1rem;
+            border-radius: 0;
+            padding: 2rem 1.5rem;
         }
         
         .entry-body {
-            padding: 1.5rem;
+            padding: 2rem 1.5rem;
         }
         
-        .step {
-            padding: 0 0.8rem;
+        .progress-steps {
+            gap: 1.5rem;
         }
         
         .step:not(:last-child):after {
-            width: 20px;
-            right: -10px;
+            right: -1.5rem;
+            width: 1.5rem;
+        }
+    }
+
+    /* Very small mobile adjustments */
+    @media (max-width: 480px) {
+
+        
+        .entry-title {
+            font-size: 1.8rem;
+        }
+        
+        .entry-subtitle {
+            font-size: 1.1rem;
+        }
+        
+        .form-label,
+        .form-label i {
+            font-size: 1.1rem;
+        }
+        
+        .form-control {
+            padding: 1rem;
+            font-size: 1.1rem;
+        }
+        
+        .btn-submit {
+            padding: 1.1rem;
+            font-size: 1.1rem;
         }
     }
 </style>

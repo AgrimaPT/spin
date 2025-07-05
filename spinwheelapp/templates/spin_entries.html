@@ -3,22 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <title>Spin Entries</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    
 
     <style>
         body {
             background-color: #f8f9fa;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
+
         .navbar-brand {
             font-weight: 600;
         }
+
         .entry-card {
             border-radius: 10px;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
+
         .offer-color {
             display: inline-block;
             width: 15px;
@@ -27,84 +33,113 @@
             margin-right: 5px;
             vertical-align: middle;
         }
+
         .search-container {
             position: relative;
             margin-bottom: 20px;
         }
+
         .search-container i {
             position: absolute;
             left: 10px;
             top: 10px;
             color: #6c757d;
         }
+
         #searchInput {
             padding-left: 35px;
             border-radius: 20px;
         }
+
         .no-results {
             display: none;
             text-align: center;
             padding: 20px;
         }
+
         .screenshot-thumbnail {
-            width: 100px;
-            height: 100px;
+            width: 80px;
+            height: 80px;
             object-fit: cover;
             border-radius: 5px;
             cursor: pointer;
             transition: transform 0.2s;
         }
+
         .screenshot-thumbnail:hover {
             transform: scale(1.05);
         }
+
         .modal-image {
             max-width: 100%;
-            max-height: 80vh;
+            max-height: 75vh;
+            object-fit: contain;
+        }
+
+        @media (max-width: 576px) {
+            .screenshot-thumbnail {
+                width: 60px;
+                height: 60px;
+            }
+
+            h2 {
+                font-size: 1.25rem;
+            }
+
+            .search-container {
+                margin-bottom: 1rem;
+            }
+
+            #searchInput {
+                padding-left: 30px;
+            }
         }
     </style>
 </head>
 <body>
 
-<!-- Navigation remains the same -->
+<!-- Navigation -->
 <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-  <div class="container-fluid">
-    <a class="navbar-brand" href="{% url 'offer_list' %}">🎡 SpinWheel Admin</a>
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent"
-            aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
-      <span class="navbar-toggler-icon"></span>
-    </button>
-    <div class="collapse navbar-collapse" id="navbarContent">
-      <ul class="navbar-nav ms-auto">
-        <li class="nav-item">
-          <a class="nav-link" href="{% url 'settings' %}">
-            <i class="fas fa-cog me-1"></i>Settings
-          </a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="{% url 'update_shop_profile' %}">
-            <i class="fas fa-store me-1"></i>Shop Profile
-          </a>
-        </li>
-        
-        <li class="nav-item">
-          <a class="nav-link" href="{% url 'logout' %}">
-            <i class="fas fa-sign-out-alt me-1"></i>Logout
-          </a>
-        </li>
-
-
-        
-      </ul>
+    <div class="container-fluid">
+        <a class="navbar-brand" href="{% url 'offer_list' %}">🎡 SpinWheel Admin</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent"
+                aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarContent">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'settings' %}">
+                        <i class="fas fa-cog me-1"></i>Settings
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'update_shop_profile' %}">
+                        <i class="fas fa-store me-1"></i>Shop Profile
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'logout' %}">
+                        <i class="fas fa-sign-out-alt me-1"></i>Logout
+                    </a>
+                </li>
+            </ul>
+        </div>
     </div>
-  </div>
 </nav>
 
+<!-- Main Content -->
 <div class="container mt-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="mb-0"><i class="fas fa-history me-2"></i>Spin Entries</h2>
-        <a class="btn btn-primary" href="{% url 'offer_list' %}">
-            <i class="fas fa-arrow-left me-1"></i>Back to Offers
-        </a>
+    <!-- Header Section -->
+    <div class="row mb-4 align-items-center">
+        <div class="col-12 col-md-6 mb-2 mb-md-0">
+            <h2 class="mb-0"><i class="fas fa-history me-2"></i>Spin Entries</h2>
+        </div>
+        <div class="col-12 col-md-6 text-md-end">
+            <a class="btn btn-primary" href="{% url 'offer_list' %}">
+                <i class="fas fa-arrow-left me-1"></i>Back to Offers
+            </a>
+        </div>
     </div>
 
     <!-- Search Bar -->
@@ -113,6 +148,7 @@
         <input type="text" id="searchInput" class="form-control" placeholder="Search entries...">
     </div>
 
+    <!-- Entries Table -->
     <div class="card shadow-sm">
         <div class="card-body p-0">
             {% if entries %}
@@ -125,7 +161,7 @@
                             <th>Phone Number</th>
                             <th>Bill Number</th>
                             <th>Reward</th>
-                            <th>Screenshots</th> <!-- New column -->
+                            <th>Screenshots</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -135,11 +171,7 @@
                             <td class="searchable">{{ entry.name }}</td>
                             <td class="searchable">{{ entry.phone }}</td>
                             <td class="searchable">
-                                {% if entry.bill_number %}
-                                    {{ entry.bill_number }}
-                                {% else %}
-                                    -
-                                {% endif %}
+                                {{ entry.bill_number|default:"-" }}
                             </td>
                             <td class="searchable">
                                 <span class="offer-color" style="background-color:{{ entry.offer.color }}"></span>
@@ -147,19 +179,21 @@
                             </td>
                             <td>
                                 {% if entry.social_verification %}
-                                <div class="d-flex">
+                                <div class="d-flex flex-wrap gap-2">
                                     {% if entry.social_verification.instagram_screenshot %}
-                                    <img src="{{ entry.social_verification.instagram_screenshot.url }}" 
-                                         class="screenshot-thumbnail me-2" 
-                                         data-bs-toggle="modal" 
+                                    <img src="{{ entry.social_verification.instagram_screenshot.url }}"
+                                         loading="lazy"
+                                         class="screenshot-thumbnail"
+                                         data-bs-toggle="modal"
                                          data-bs-target="#imageModal"
                                          data-image="{{ entry.social_verification.instagram_screenshot.url }}"
                                          title="Instagram Screenshot">
                                     {% endif %}
                                     {% if entry.social_verification.google_review_screenshot %}
-                                    <img src="{{ entry.social_verification.google_review_screenshot.url }}" 
-                                         class="screenshot-thumbnail" 
-                                         data-bs-toggle="modal" 
+                                    <img src="{{ entry.social_verification.google_review_screenshot.url }}"
+                                         loading="lazy"
+                                         class="screenshot-thumbnail"
+                                         data-bs-toggle="modal"
                                          data-bs-target="#imageModal"
                                          data-image="{{ entry.social_verification.google_review_screenshot.url }}"
                                          title="Google Review Screenshot">
@@ -206,50 +240,38 @@
     </div>
 </div>
 
-<!-- Font Awesome -->
-<script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
-<!-- Bootstrap JS -->
+<!-- Scripts -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
-<!-- Search Functionality -->
 <script>
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     const searchInput = document.getElementById('searchInput');
     const rows = document.querySelectorAll('.entry-row');
     const noResults = document.getElementById('noResults');
-    
-    searchInput.addEventListener('keyup', function() {
+
+    searchInput.addEventListener('keyup', function () {
         const searchTerm = this.value.toLowerCase();
         let hasResults = false;
-        
+
         rows.forEach(row => {
             const cells = row.querySelectorAll('.searchable');
             let rowMatches = false;
-            
+
             cells.forEach(cell => {
                 if (cell.textContent.toLowerCase().includes(searchTerm)) {
                     rowMatches = true;
                 }
             });
-            
-            if (rowMatches) {
-                row.style.display = '';
-                hasResults = true;
-            } else {
-                row.style.display = 'none';
-            }
+
+            row.style.display = rowMatches ? '' : 'none';
+            if (rowMatches) hasResults = true;
         });
-        
-        // Show/hide no results message
-        if (rows.length > 0) {
-            noResults.style.display = hasResults ? 'none' : 'block';
-        }
+
+        noResults.style.display = hasResults ? 'none' : 'block';
     });
 
-    // Image modal functionality
     const imageModal = document.getElementById('imageModal');
     if (imageModal) {
-        imageModal.addEventListener('show.bs.modal', function(event) {
+        imageModal.addEventListener('show.bs.modal', function (event) {
             const button = event.relatedTarget;
             const imageUrl = button.getAttribute('data-image');
             const modalImage = document.getElementById('modalImage');
