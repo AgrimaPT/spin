@@ -442,11 +442,14 @@ def spin_page(request):
             'content_rotate': content_rotate,
         })
 
+    entry_data = request.session.get('entry_data', {})
+
     return render(request, 'spin.html', {
         'segments': segments,
         'angle_per_segment': angle_per_segment,
         'shop': shop,
         'shop_settings': shop_settings,
+        'entry_data': entry_data
     })
 
 
