@@ -719,44 +719,133 @@ from django.contrib import messages
 from .models import ShopProfile, ShopSettings, SpinEntry, SocialVerification, GameType
 import random
 
+# def social_verification(request, shop_code):
+#     shop = get_object_or_404(ShopProfile, shop_code=shop_code)
+#     settings = get_object_or_404(ShopSettings, shop=shop)
+    
+#     # Get entry data from session
+#     entry_data = request.session.get('entry_data', {})
+#     if not entry_data or 'phone' not in entry_data:
+#         messages.error(request, "Session expired. Please start over.")
+#         return redirect('qr_entry_form', shop_code=shop_code)
+    
+#     # Check if already verified
+#     if request.session.get('social_verified'):
+#         # Redirect to appropriate game based on settings
+#         if settings.game_type == GameType.SPIN_WHEEL:
+#             return redirect('spin_page')
+#         else:
+#             return redirect('scratch_card')
+
+#     if request.method == 'POST':
+#         try:
+#             # Create temporary entry (works for both game types)
+#             spin_entry = SpinEntry.objects.create(
+#                 name=entry_data['name'],
+#                 phone=entry_data['phone'],
+#                 shop=shop,
+#                 bill_number=entry_data.get('bill_number', ''),
+#                 offer=None  # Will be set after game interaction
+#             )
+
+#             # Handle file uploads if screenshot verification is required
+#             if settings.require_screenshot:
+#                 if not all(k in request.FILES for k in ['instagram_screenshot', 'google_screenshot']):
+#                     messages.error(request, "Both screenshots are required")
+#                     spin_entry.delete()  # Clean up the temporary entry
+#                     return redirect('social_verification', shop_code=shop_code)
+                
+#                 fs = FileSystemStorage()
+#                 # Save files to media storage immediately
+#                 instagram_file = request.FILES['instagram_screenshot']
+#                 google_file = request.FILES['google_screenshot']
+                
+#                 instagram_filename = fs.save(
+#                     f'verifications/instagram_{spin_entry.id}_{instagram_file.name}', 
+#                     instagram_file
+#                 )
+#                 google_filename = fs.save(
+#                     f'verifications/google_{spin_entry.id}_{google_file.name}', 
+#                     google_file
+#                 )
+                
+#                 # Create verification record
+#                 SocialVerification.objects.create(
+#                     entry=spin_entry,
+#                     instagram_screenshot=instagram_filename,
+#                     google_review_screenshot=google_filename
+#                 )
+
+#             # Mark as verified in session and store entry ID
+#             request.session['social_verified'] = True
+#             request.session['temp_spin_id'] = spin_entry.id
+#             request.session.modified = True
+            
+#             # Redirect to appropriate game based on settings
+#             if settings.game_type == GameType.SPIN_WHEEL:
+#                 return redirect('spin_page')
+#             else:
+#                 return redirect('scratch_card')
+            
+#         except Exception as e:
+#             messages.error(request, f"Error processing verification: {str(e)}")
+#             return redirect('social_verification', shop_code=shop_code)
+    
+#     return render(request, 'social_verification.html', {
+#         'shop': shop,
+#         'settings': settings,
+#         'require_screenshot': settings.require_screenshot,
+#         'game_type': settings.get_game_type_display()  # Add to template context
+#     })
+
+
 def social_verification(request, shop_code):
     shop = get_object_or_404(ShopProfile, shop_code=shop_code)
     settings = get_object_or_404(ShopSettings, shop=shop)
     
+    # Check if already verified
+    if request.session.get('social_verified'):
+        if settings.game_type == 'SW':
+            return redirect('spin_page')
+        else:
+            return redirect('scratch_card')
+
     # Get entry data from session
     entry_data = request.session.get('entry_data', {})
     if not entry_data or 'phone' not in entry_data:
         messages.error(request, "Session expired. Please start over.")
         return redirect('qr_entry_form', shop_code=shop_code)
-    
-    # Check if already verified
-    if request.session.get('social_verified'):
-        # Redirect to appropriate game based on settings
-        if settings.game_type == GameType.SPIN_WHEEL:
-            return redirect('spin_page')
-        else:
-            return redirect('scratch_card')
 
     if request.method == 'POST':
         try:
-            # Create temporary entry (works for both game types)
-            spin_entry = SpinEntry.objects.create(
-                name=entry_data['name'],
-                phone=entry_data['phone'],
-                shop=shop,
-                bill_number=entry_data.get('bill_number', ''),
-                offer=None  # Will be set after game interaction
-            )
+            # Check if we have a temporary spin entry already
+            temp_spin_id = request.session.get('temp_spin_id')
+            if temp_spin_id:
+                try:
+                    spin_entry = SpinEntry.objects.get(id=temp_spin_id)
+                except SpinEntry.DoesNotExist:
+                    spin_entry = None
+            else:
+                spin_entry = None
+
+            # Create new entry if needed
+            if not spin_entry:
+                spin_entry = SpinEntry.objects.create(
+                    name=entry_data['name'],
+                    phone=entry_data['phone'],
+                    shop=shop,
+                    bill_number=entry_data.get('bill_number', ''),
+                    offer=None
+                )
+                request.session['temp_spin_id'] = spin_entry.id
 
             # Handle file uploads if screenshot verification is required
             if settings.require_screenshot:
                 if not all(k in request.FILES for k in ['instagram_screenshot', 'google_screenshot']):
                     messages.error(request, "Both screenshots are required")
-                    spin_entry.delete()  # Clean up the temporary entry
                     return redirect('social_verification', shop_code=shop_code)
                 
                 fs = FileSystemStorage()
-                # Save files to media storage immediately
                 instagram_file = request.FILES['instagram_screenshot']
                 google_file = request.FILES['google_screenshot']
                 
@@ -776,13 +865,12 @@ def social_verification(request, shop_code):
                     google_review_screenshot=google_filename
                 )
 
-            # Mark as verified in session and store entry ID
+            # Mark as verified in session
             request.session['social_verified'] = True
-            request.session['temp_spin_id'] = spin_entry.id
             request.session.modified = True
             
-            # Redirect to appropriate game based on settings
-            if settings.game_type == GameType.SPIN_WHEEL:
+            # Redirect to appropriate game
+            if settings.game_type == 'SW':
                 return redirect('spin_page')
             else:
                 return redirect('scratch_card')
@@ -795,7 +883,7 @@ def social_verification(request, shop_code):
         'shop': shop,
         'settings': settings,
         'require_screenshot': settings.require_screenshot,
-        'game_type': settings.get_game_type_display()  # Add to template context
+        'game_type': settings.get_game_type_display()
     })
 
 # views.py

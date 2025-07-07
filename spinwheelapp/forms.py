@@ -94,8 +94,7 @@ class SpinEntryForm(forms.Form):
             if self.shop:
                 if SpinEntry.objects.filter(shop=self.shop, bill_number=bill_number).exists():
                     raise forms.ValidationError(
-                        "This bill number has already been used for a spin in this shop. "
-                        "Please use a different bill number."
+                        "This bill number has already been used."
                     )
         return bill_number
     
