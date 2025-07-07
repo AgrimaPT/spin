@@ -20,7 +20,7 @@ from .models import Offer, ShopProfile, SpinEntry
 from django.contrib import messages
 from django.utils import timezone
 from datetime import timedelta
-from django.core.exceptions import ValidationError, IntegrityError
+
 
 
 
@@ -303,16 +303,6 @@ def qr_entry_form(request, shop_code):
                 # Store the entry ID in session
                 request.session['temp_spin_id'] = spin_entry.id
                 request.session.save()
-
-                # request.session['spin_data'] = {
-                #     'temp_spin_id': spin_entry.id,
-                #     'customer_name': form.cleaned_data['name'],
-                #     'customer_phone': form.cleaned_data['phone'],
-                #     'customer_bill': form.cleaned_data.get('bill_number', ''),
-                #     'shop_name': shop.shop_name,
-                #     'shop_whatsapp': shop.whatsapp_number
-                # }
-                # request.session.modified = True
                 
                 # Handle social verification if required
                 if shop_settings.require_social_verification:
@@ -403,13 +393,6 @@ def spin_page(request):
     if not temp_spin_id:
         messages.error(request, "Session expired or invalid. Please start over.")
         return redirect('home')  # Or redirect to your entry form
-
-
-    # spin_data = request.session.get('spin_data', {})
-    
-    # if not spin_data.get('temp_spin_id'):
-    #     messages.error(request, "Session expired or invalid. Please start over.")
-    #     return redirect('qr_entry_form', shop_code=request.user.shopprofile.shop_code)
     
     try:
         # Get the spin entry
@@ -458,20 +441,15 @@ def spin_page(request):
             'content_skew': content_skew,
             'content_rotate': content_rotate,
         })
-    print("Session entry_data:", request.session.get('entry_data'))
-    
+
     entry_data = request.session.get('entry_data', {})
-    print("Entry data contents:", entry_data)
 
     return render(request, 'spin.html', {
         'segments': segments,
         'angle_per_segment': angle_per_segment,
         'shop': shop,
         'shop_settings': shop_settings,
-        'entry_data': entry_data,
-        'customer_name': entry_data.get('name', 'Not provided'),
-        'customer_phone': entry_data.get('phone', 'Not provided'),
-        'customer_bill': entry_data.get('bill_number', 'Not provided'),
+        'entry_data': entry_data
     })
 
 
