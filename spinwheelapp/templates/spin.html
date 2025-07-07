@@ -846,8 +846,8 @@ canvas.confetti-canvas {
             // const shopName = "{{ shop.shop_name|escapejs }}";
             // const shopPhone = "{{ shop.whatsapp_number|escapejs }}".replace(/\D/g, '');
             const shopName = `{{ shop.shop_name|escapejs }}`;
-            const shopPhone = `{{ shop_whatsapp|escapejs }}`.replace(/\D/g, '');
-            
+            const shopPhone = `{{ shop.whatsapp_number|escapejs }}`.replace(/\D/g, '');
+
             if (!shopPhone) {
                 alert("This shop hasn't set up WhatsApp claims yet. Please contact them directly.");
                 return;
