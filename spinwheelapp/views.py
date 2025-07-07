@@ -392,7 +392,7 @@ def build_segments(offers):
 
     return segments
 
-@login_required
+
 def spin_page(request):
     # Check if we have a temporary spin entry ID
     temp_spin_id = request.session.get('temp_spin_id')
@@ -594,6 +594,7 @@ def process_spin(request):
             if not temp_spin_id:
                 messages.error(request, "Session expired. Please start over.")
                 return redirect('qr_entry_form', shop_code='')  # or show a general fallback page
+            
             
             # Get selected offer
             selected_offer_id = request.POST.get('selected_offer')
