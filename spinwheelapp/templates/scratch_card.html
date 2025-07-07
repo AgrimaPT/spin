@@ -414,34 +414,80 @@
         }
         
         // Improved WhatsApp button handler
-        whatsappBtn.addEventListener('click', function(e) {
-            e.preventDefault();
-            const shopPhone = "{{ shop.whatsapp_number|default:'919876543210' }}".replace(/\D/g, '');
-            const message = `🎉 I won: {{ selected_offer.name }} at {{ shop.shop_name }}!`;
-            const encodedMessage = encodeURIComponent(message);
+        // whatsappBtn.addEventListener('click', function(e) {
+        //     e.preventDefault();
+        //     const shopPhone = "{{ shop.whatsapp_number|default:'919876543210' }}".replace(/\D/g, '');
+        //     const message = `🎉 I won: {{ selected_offer.name }} at {{ shop.shop_name }}!`;
+        //     const encodedMessage = encodeURIComponent(message);
             
-            const isMobile = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        //     const isMobile = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
             
-            if (isMobile) {
-                // Try app link first with fallback to web
-                const appUrl = `whatsapp://send?phone=${shopPhone}&text=${encodedMessage}`;
-                const webUrl = `https://wa.me/${shopPhone}?text=${encodedMessage}`;
+        //     if (isMobile) {
+        //         // Try app link first with fallback to web
+        //         const appUrl = `whatsapp://send?phone=${shopPhone}&text=${encodedMessage}`;
+        //         const webUrl = `https://wa.me/${shopPhone}?text=${encodedMessage}`;
                 
-                // Create hidden iframe to attempt app opening
-                const iframe = document.createElement('iframe');
-                iframe.style.display = 'none';
-                iframe.src = appUrl;
-                document.body.appendChild(iframe);
+        //         // Create hidden iframe to attempt app opening
+        //         const iframe = document.createElement('iframe');
+        //         iframe.style.display = 'none';
+        //         iframe.src = appUrl;
+        //         document.body.appendChild(iframe);
                 
-                setTimeout(() => {
-                    document.body.removeChild(iframe);
-                    window.location.href = webUrl;
-                }, 500);
-            } else {
-                // Desktop - always use web version
-                window.open(`https://web.whatsapp.com/send?phone=${shopPhone}&text=${encodedMessage}`, '_blank');
-            }
-        });
+        //         setTimeout(() => {
+        //             document.body.removeChild(iframe);
+        //             window.location.href = webUrl;
+        //         }, 500);
+        //     } else {
+        //         // Desktop - always use web version
+        //         window.open(`https://web.whatsapp.com/send?phone=${shopPhone}&text=${encodedMessage}`, '_blank');
+        //     }
+        // });
+
+
+
+        // Improved WhatsApp button handler with full details
+whatsappBtn.addEventListener('click', function(e) {
+    e.preventDefault();
+    
+    const shopPhone = "{{ shop.whatsapp_number|default:'918848647616' }}".replace(/\D/g, '');
+    const shopName = "{{ shop.shop_name|escapejs }}";
+    const offerName = "{{ selected_offer.name|escapejs }}";
+    
+    // Get customer data from template variables
+    const userData = {
+        name: "{{ customer_name|escapejs }}" || 'Not provided',
+        phone: "{{ customer_phone|escapejs }}" || 'Not provided',
+        bill: "{{ customer_bill|escapejs }}" || 'Not provided'
+    };
+
+    // Format the message exactly like spin wheel
+    const message = `🎉 Prize Claim Notification 🎉\n\n` +
+                   `*Shop:* ${shopName}\n` +
+                   `*Prize Won:* ${offerName}\n\n` +
+                   `*Customer Details:*\n` +
+                   `- Name: ${userData.name}\n` +
+                   `- Phone: ${userData.phone}\n` +
+                   `- Bill No: ${userData.bill}\n\n` +
+                   `Please advise how to claim this prize.`;
+
+    const encodedMessage = encodeURIComponent(message);
+    const isMobile = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    
+    if (isMobile) {
+        // Try native app first with fallback to web
+        const iframe = document.createElement('iframe');
+        iframe.style.display = 'none';
+        iframe.src = `whatsapp://send?phone=${shopPhone}&text=${encodedMessage}`;
+        document.body.appendChild(iframe);
+        
+        setTimeout(() => {
+            document.body.removeChild(iframe);
+            window.location.href = `https://wa.me/${shopPhone}?text=${encodedMessage}`;
+        }, 500);
+    } else {
+        window.open(`https://web.whatsapp.com/send?phone=${shopPhone}&text=${encodedMessage}`, '_blank');
+    }
+});
         
         // Event listeners
         canvas.addEventListener('mousedown', startScratch);

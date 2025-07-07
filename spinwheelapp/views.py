@@ -532,7 +532,7 @@ def settings_view(request):
             
             settings.save()
             messages.success(request, "Settings updated successfully!")
-            return redirect('settings')
+            return redirect('offer_list')
             
         except Exception as e:
             messages.error(request, f"Error updating settings: {str(e)}")
@@ -803,9 +803,53 @@ from django.core import serializers
 import json
 from django.http import JsonResponse
 
-def scratch_card(request):
-    shop = request.user.shopprofile
-    offers = Offer.objects.filter(shop=shop)
+# def scratch_card(request):
+#     shop = request.user.shopprofile
+#     offers = Offer.objects.filter(shop=shop)
+    
+#     # Get the temporary entry
+#     temp_spin_id = request.session.get('temp_spin_id')
+#     if not temp_spin_id:
+#         return redirect('qr_entry_form', shop_code=shop.shop_code)
+    
+#     # Select a random offer (weighted by percentage)
+#     total_weight = sum(o.percentage for o in offers)
+#     rand = random.uniform(0, total_weight)
+#     current = 0
+#     selected_offer = None
+    
+#     for offer in offers:
+#         current += offer.percentage
+#         if rand <= current:
+#             selected_offer = offer
+#             break
+    
+#     if request.method == 'POST':
+#         # Update the entry with the selected offer
+#         SpinEntry.objects.filter(id=temp_spin_id).update(offer=selected_offer)
+        
+#         # Clear session data
+#         if 'temp_spin_id' in request.session:
+#             del request.session['temp_spin_id']
+#         if 'entry_data' in request.session:
+#             del request.session['entry_data']
+        
+#         if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+#             return JsonResponse({'status': 'success'})
+#         return redirect('qr_entry_form', shop_code=shop.shop_code)
+    
+#     return render(request, 'scratch_card.html', {
+#         'selected_offer': selected_offer,
+#         'shop': shop
+#     })
+
+def scratch_card(request, shop_code=None):
+    if shop_code:
+        shop = get_object_or_404(ShopProfile, shop_code=shop_code)
+    else:
+        if not request.user.is_authenticated:
+            return redirect('login')
+        shop = request.user.shopprofile
     
     # Get the temporary entry
     temp_spin_id = request.session.get('temp_spin_id')
@@ -813,6 +857,7 @@ def scratch_card(request):
         return redirect('qr_entry_form', shop_code=shop.shop_code)
     
     # Select a random offer (weighted by percentage)
+    offers = Offer.objects.filter(shop=shop)
     total_weight = sum(o.percentage for o in offers)
     rand = random.uniform(0, total_weight)
     current = 0
@@ -838,7 +883,12 @@ def scratch_card(request):
             return JsonResponse({'status': 'success'})
         return redirect('qr_entry_form', shop_code=shop.shop_code)
     
+    # Pass customer data from session
+    entry_data = request.session.get('entry_data', {})
     return render(request, 'scratch_card.html', {
         'selected_offer': selected_offer,
-        'shop': shop
+        'shop': shop,
+        'customer_name': entry_data.get('name', ''),
+        'customer_phone': entry_data.get('phone', ''),
+        'customer_bill': entry_data.get('bill_number', '')
     })

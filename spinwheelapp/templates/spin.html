@@ -931,7 +931,7 @@ canvas.confetti-canvas {
         const spins = 5;
         const rotateTo = spins * 360 + (chosenIndex * anglePerSegment) + (anglePerSegment / 2);
         wheel.style.transition = 'transform 4s cubic-bezier(0.17, 0.67, 0.12, 0.99)';
-        wheel.style.transform = `rotate(-${rotateTo}deg)`;
+        wheel.style.transform = `rotate(${rotateTo}deg)`;
 
         // Play spinning sound effect
         try {
