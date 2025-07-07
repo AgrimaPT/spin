@@ -450,9 +450,9 @@ def spin_page(request):
         'shop': shop,
         'shop_settings': shop_settings,
         'entry_data': entry_data,
-        'customer_name': entry_data.get('name', ''),
-        'customer_phone': entry_data.get('phone', ''),
-        'customer_bill': entry_data.get('bill_number', 'N/A'),
+        'customer_name': entry_data.get('name', 'Not provided'),
+        'customer_phone': entry_data.get('phone', 'Not provided'),
+        'customer_bill': entry_data.get('bill_number', 'Not provided'),
     })
 
 
