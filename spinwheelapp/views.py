@@ -399,14 +399,21 @@ def build_segments(offers):
 @login_required
 def spin_page(request):
     # Check if we have a temporary spin entry ID
-    temp_spin_id = request.session.get('temp_spin_id')
-    if not temp_spin_id:
+    # temp_spin_id = request.session.get('temp_spin_id')
+    # if not temp_spin_id:
+    #     messages.error(request, "Session expired or invalid. Please start over.")
+    #     return redirect('home')  # Or redirect to your entry form
+
+
+    spin_data = request.session.get('spin_data', {})
+    
+    if not spin_data.get('temp_spin_id'):
         messages.error(request, "Session expired or invalid. Please start over.")
-        return redirect('home')  # Or redirect to your entry form
+        return redirect('qr_entry_form', shop_code=request.user.shopprofile.shop_code)
     
     try:
         # Get the spin entry
-        spin_entry = SpinEntry.objects.get(id=temp_spin_id)
+        spin_entry = SpinEntry.objects.get(id=spin_data['temp_spin_id'])
         shop = spin_entry.shop
         shop_settings = ShopSettings.objects.get(shop=shop)
         
