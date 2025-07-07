@@ -301,8 +301,18 @@ def qr_entry_form(request, shop_code):
                 spin_entry.save()
                 
                 # Store the entry ID in session
-                request.session['temp_spin_id'] = spin_entry.id
-                request.session.save()
+                # request.session['temp_spin_id'] = spin_entry.id
+                # request.session.save()
+
+                request.session['spin_data'] = {
+                    'temp_spin_id': spin_entry.id,
+                    'customer_name': form.cleaned_data['name'],
+                    'customer_phone': form.cleaned_data['phone'],
+                    'customer_bill': form.cleaned_data.get('bill_number', ''),
+                    'shop_name': shop.shop_name,
+                    'shop_whatsapp': shop.whatsapp_number
+                }
+                request.session.modified = True
                 
                 # Handle social verification if required
                 if shop_settings.require_social_verification:
@@ -441,8 +451,10 @@ def spin_page(request):
             'content_skew': content_skew,
             'content_rotate': content_rotate,
         })
-
+    print("Session entry_data:", request.session.get('entry_data'))
+    
     entry_data = request.session.get('entry_data', {})
+    print("Entry data contents:", entry_data)
 
     return render(request, 'spin.html', {
         'segments': segments,
