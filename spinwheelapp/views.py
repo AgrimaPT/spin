@@ -449,7 +449,10 @@ def spin_page(request):
         'angle_per_segment': angle_per_segment,
         'shop': shop,
         'shop_settings': shop_settings,
-        'entry_data': entry_data
+        'entry_data': entry_data,
+        'customer_name': entry_data.get('name', ''),
+        'customer_phone': entry_data.get('phone', ''),
+        'customer_bill': entry_data.get('bill_number', 'N/A'),
     })
 
 
