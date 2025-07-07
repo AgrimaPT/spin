@@ -289,6 +289,12 @@ def qr_entry_form(request, shop_code):
     if request.method == 'POST':
         form = SpinEntryForm(request.POST, require_bill=shop_settings.require_bill_number, shop=shop)
         if form.is_valid():
+            # Store the entry data in session
+            request.session['entry_data'] = {
+                'name': form.cleaned_data['name'],
+                'phone': form.cleaned_data['phone'],
+                'bill_number': form.cleaned_data.get('bill_number', '')
+            }
             # Create the SpinEntry manually since we're using forms.Form
             spin_entry = SpinEntry(
                 name=form.cleaned_data['name'],
@@ -449,7 +455,10 @@ def spin_page(request):
         'angle_per_segment': angle_per_segment,
         'shop': shop,
         'shop_settings': shop_settings,
-        'entry_data': entry_data
+        'entry_data': entry_data,
+        'customer_name': entry_data.get('name', ''),
+        'customer_phone': entry_data.get('phone', ''),
+        'customer_bill': entry_data.get('bill_number', ''),
     })
 
 

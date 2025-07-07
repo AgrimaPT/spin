@@ -876,14 +876,14 @@ canvas.confetti-canvas {
 
             
             // Format the WhatsApp message
-            const message = `🎉 Prize Claim Notification 🎉%0a%0a` +
-                        `*Shop:* ${shopName}%0a` +
-                        `*Prize Won:* ${offerName}%0a%0a` +
-                        `*Customer Details:*%0a` +
-                        `- Name: ${userData.name}%0a` +
-                        `- Phone: ${userData.phone}%0a` +
-                        `- Bill No: ${userData.bill}%0a%0a` +
-                        `Please advise how to claim this prize.`;
+            const message = `🎉 Prize Claim Notification 🎉\n\n` +
+                   `*Shop:* ${shopName}\n` +
+                   `*Prize Won:* ${offerName}\n\n` +
+                   `*Customer Details:*\n` +
+                   `- Name: ${userData.name}\n` +
+                   `- Phone: ${userData.phone}\n` +
+                   `- Bill No: ${userData.bill}\n\n` +
+                   `Please advise how to claim this prize.`;
 
             // Check if mobile device
             const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
