@@ -219,6 +219,8 @@
         grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
         gap: 1.5rem;
         margin-bottom: 2rem;
+        overflow: hidden; /* Prevent overflow */
+        width: 100%;
     }
 
     .verification-item {
@@ -226,8 +228,11 @@
         border-radius: var(--border-radius);
         border: 1px solid rgba(0, 0, 0, 0.05);
         transition: transform 0.3s ease, box-shadow 0.3s ease;
+        max-width: 100%; /* Prevent items from growing beyond container */
+        box-sizing: border-box;
     }
 
+    
     .verification-item:hover {
         transform: translateY(-5px);
         box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
@@ -353,6 +358,8 @@
         background: #f8f9fa;
         border-radius: var(--border-radius);
         display: none;
+        max-width: 100%; /* Ensure preview doesn't overflow */
+        overflow: hidden; 
     }
 
     .file-preview.show {
@@ -371,13 +378,19 @@
         font-size: 1.2rem;
     }
 
-    .file-name {
+    /* .file-name {
         flex-grow: 1;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
         font-size: 0.9rem;
-    }
+    } */
+     .file-name {
+    max-width: calc(100% - 50px); /* Leave space for icons */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
 
     .file-remove {
         color: var(--error-color);
@@ -451,6 +464,33 @@
         .verification-grid {
             grid-template-columns: 1fr;
         }
+        .verification-item {
+        padding: 1rem; /* Reduce padding on mobile */
+    }
+    
+    .upload-label {
+        padding: 1rem; /* Reduce upload area padding */
+    }
+    
+    .file-preview {
+        padding: 8px; /* Reduce preview padding */
+    }
+
+
+    @media (max-width: 480px) {
+    .verification-item {
+        padding: 0.8rem; /* Further reduce padding */
+    }
+    
+    .btn {
+        padding: 0.5rem 1rem; /* Adjust button padding */
+        font-size: 0.9rem; /* Smaller button text */
+    }
+    
+    .platform-title {
+        font-size: 1.1rem; /* Adjust title size */
+    }
+}
     }
 </style>
 
@@ -476,11 +516,14 @@ document.addEventListener('DOMContentLoaded', function() {
             const file = e.target.files[0];
             if (file) {
                 // Update UI
+                const fileName = file.name.length > 20 
+    ? file.name.substring(0, 19) + '...' + file.name.substring(file.name.lastIndexOf('.'))
+    : file.name;
                 textElement.textContent = 'Change File';
                 previewElement.innerHTML = `
                     <div class="file-info">
                         <i class="fas fa-file-image file-icon"></i>
-                        <span class="file-name">${file.name}</span>
+                        <span class="file-name">${fileName}</span>
                         <i class="fas fa-times file-remove" title="Remove file"></i>
                     </div>
                 `;
