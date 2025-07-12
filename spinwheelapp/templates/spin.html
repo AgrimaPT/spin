@@ -3,7 +3,7 @@
 <head>
     <title>Spin the Wheel</title>
     <!-- <meta name="viewport" content="width=device-width, initial-scale=1.0"> -->
-     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <style>
 
         html, body {
@@ -799,15 +799,15 @@ canvas.confetti-canvas {
     }
 
     // Weighted random selection based on percentages
-    function weightedRandom(segments) {
-        const totalWeight = segments.reduce((sum, seg) => sum + seg.percentage, 0);
-        let rand = Math.random() * totalWeight;
-        for (let i = 0; i < segments.length; i++) {
-            rand -= segments[i].percentage;
-            if (rand <= 0) return i;
-        }
-        return segments.length - 1;
-    }
+    // function weightedRandom(segments) {
+    //     const totalWeight = segments.reduce((sum, seg) => sum + seg.percentage, 0);
+    //     let rand = Math.random() * totalWeight;
+    //     for (let i = 0; i < segments.length; i++) {
+    //         rand -= segments[i].percentage;
+    //         if (rand <= 0) return i;
+    //     }
+    //     return segments.length - 1;
+    // }
 
     function closeModal() {
         document.getElementById('modal').style.display = 'none';
@@ -917,81 +917,289 @@ canvas.confetti-canvas {
     }
 
     // Handle spin button click
-    spinButton.addEventListener('click', async function(e) {
-        if (isSpinning) return;
-        isSpinning = true;
-        e.preventDefault();
-        spinButton.disabled = true;
+    // Handle spin button click
 
-        // Unlock audio first
-        await unlockAudio();
 
-        const chosenIndex = weightedRandom(segments);
-        selectedOfferId = segments[chosenIndex].id;
-        const spins = 5;
-        const rotateTo = spins * 360 + (chosenIndex * anglePerSegment) + (anglePerSegment / 2);
-        wheel.style.transition = 'transform 4s cubic-bezier(0.17, 0.67, 0.12, 0.99)';
-        wheel.style.transform = `rotate(${rotateTo}deg)`;
 
-        // Play spinning sound effect
-        try {
-            spinSound.currentTime = 0;
-            spinSound.volume = 0.4;
-            spinSound.loop = true;
-            await spinSound.play();
-        } catch (e) {
-            console.log("Spin sound play failed:", e);
+
+    // Global variables to track spins
+// let spinCount = 0;
+// let spinBatchSize = 20; // Adjust as needed
+// let shuffledOffers = [];
+
+// // Initialize a fair distribution for the current batch
+// function initFairDistribution(segments) {
+//     const totalPercentage = segments.reduce((sum, seg) => sum + seg.percentage, 0);
+//     const offersInBatch = [];
+    
+//     segments.forEach(seg => {
+//         const expectedWins = Math.round((seg.percentage / totalPercentage) * spinBatchSize);
+//         for (let i = 0; i < expectedWins; i++) {
+//             offersInBatch.push(seg);
+//         }
+//     });
+
+//     // Fill remaining slots (due to rounding errors) with random offers
+//     while (offersInBatch.length < spinBatchSize) {
+//         offersInBatch.push(segments[Math.floor(Math.random() * segments.length)]);
+//     }
+
+//     // Shuffle the batch to avoid predictability
+//     shuffledOffers = shuffleArray(offersInBatch);
+// }
+
+// // Helper function to shuffle an array
+// function shuffleArray(array) {
+//     const newArray = [...array];
+//     for (let i = newArray.length - 1; i > 0; i--) {
+//         const j = Math.floor(Math.random() * (i + 1));
+//         [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+//     }
+//     return newArray;
+// }
+
+
+// // Modified spin logic
+// spinButton.addEventListener('click', async function(e) {
+//     if (isSpinning) return;
+//     isSpinning = true;
+//     spinButton.disabled = true;
+
+//     // Reset batch if needed
+//     if (spinCount % spinBatchSize === 0) {
+//         initFairDistribution(segments);
+//     }
+
+//     // Get the next offer in the shuffled batch
+//     const chosenIndex = segments.findIndex(seg => seg.id === shuffledOffers[spinCount % spinBatchSize].id);
+//     selectedOfferId = segments[chosenIndex].id;
+    
+//     // Calculate rotation (clockwise)
+//     const segmentCenterAngle = (total - chosenIndex) * anglePerSegment - (anglePerSegment / 2);
+//     const fullRotations = 5;
+//     const rotationAngle = (fullRotations * 360) + segmentCenterAngle;
+    
+//     wheel.style.transition = 'transform 4s cubic-bezier(0.17, 0.67, 0.12, 0.99)';
+//     wheel.style.transform = `rotate(${rotationAngle}deg)`;
+
+//     // Play sounds, update UI, etc.
+//     spinCount++;
+//     // Debug output
+//     console.log('Selected:', segments[chosenIndex].name, 
+//                '| Index:', chosenIndex,
+//                '| Center Angle:', segmentCenterAngle,
+//                '| Total Rotation:', rotationAngle);
+
+//     // Play spinning sound effect
+//     try {
+//         spinSound.currentTime = 0;
+//         spinSound.volume = 0.4;
+//         spinSound.loop = true;
+//         await spinSound.play();
+//     } catch (e) {
+//         console.log("Spin sound play failed:", e);
+//     }
+
+//     setTimeout(async () => {
+//         // Highlight the selected segment
+//         document.querySelectorAll('.segment-label').forEach((el, i) => {
+//             el.classList.toggle('selected', i === chosenIndex);
+//         });
+
+//         document.getElementById('selected-offer-input').value = selectedOfferId;
+
+//         try {
+//             spinSound.pause();
+//             spinSound.currentTime = 0;
+//             winSound.currentTime = 0;
+//             winSound.volume = 0.6;
+//             await winSound.play();
+//         } catch (e) {
+//             console.log("Win sound play failed:", e);
+//         }
+
+//         // Show modal with correct prize
+//         document.getElementById('winning-offer-name').textContent = segments[chosenIndex].name;
+//         document.getElementById('modal').style.display = 'flex';
+
+//     }, 4100);
+    
+//     setTimeout(() => {
+//         isSpinning = false;
+//         spinButton.disabled = false;
+//     }, 4100);
+// });
+
+
+
+// Global variables to track spins
+// Global variables
+let spinCount = 0;
+const spinBatchSize = 20; // Must be divisible by 100 for perfect percentage matching
+let shuffledOffers = [];
+
+// Initialize fair distribution with exact percentages
+function initFairDistribution(segments) {
+    const offersInBatch = [];
+    
+    // Calculate exact counts for each segment
+    segments.forEach(seg => {
+        const count = Math.round((seg.percentage / 100) * spinBatchSize);
+        for (let i = 0; i < count; i++) {
+            offersInBatch.push(seg);
         }
-
-        setTimeout(async () => {
-            // Highlight the selected segment
-            document.querySelectorAll('.segment-label').forEach((el, i) => {
-                el.classList.toggle('selected', i === chosenIndex);
-            });
-
-            // Set the selected offer in the hidden input
-            document.getElementById('selected-offer-input').value = selectedOfferId;
-
-            // Stop and play winning sound
-            try {
-                spinSound.pause();
-                spinSound.currentTime = 0;
-                winSound.currentTime = 0;
-                winSound.volume = 0.6;
-                await winSound.play();
-            } catch (e) {
-                console.log("Win sound play failed:", e);
-            }
-
-            // Confetti with multiple bursts
-            confettiInterval = setInterval(() => {
-                confetti({
-                    particleCount: 100,
-                    spread: 70,
-                    origin: { y: 0.6 }
-                });
-            }, 300);
-
-            // Show modal with the prize
-            document.getElementById('winning-offer-name').textContent = segments[chosenIndex].name;
-            document.getElementById('modal').style.display = 'flex';
-
-            try {
-                winModalSound.currentTime = 0;
-                winModalSound.volume = 0.5;
-                await winModalSound.play();
-            } catch (e) {
-                console.log("Modal sound play failed:", e);
-            }
-
-        }, 4100);
-        
-        // Reset spinning state after animation completes
-        setTimeout(() => {
-            isSpinning = false;
-            spinButton.disabled = false;
-        }, 4100);
     });
+
+    // Fill any remaining slots (due to rounding) with random segments
+    while (offersInBatch.length < spinBatchSize) {
+        offersInBatch.push(segments[Math.floor(Math.random() * segments.length)]);
+    }
+
+    // Shuffle the results
+    shuffledOffers = shuffleArray(offersInBatch);
+}
+
+// Fisher-Yates shuffle
+function shuffleArray(array) {
+    const newArray = [...array];
+    for (let i = newArray.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+    }
+    return newArray;
+}
+
+// Initialize first batch
+initFairDistribution(segments);
+
+// Spin button handler
+spinButton.addEventListener('click', async function(e) {
+    if (isSpinning) return;
+    isSpinning = true;
+    spinButton.disabled = true;
+
+    // Reset batch if needed
+    if (spinCount > 0 && spinCount % spinBatchSize === 0) {
+        initFairDistribution(segments);
+    }
+
+    // Get the next offer
+    const chosenOffer = shuffledOffers[spinCount % spinBatchSize];
+    const chosenIndex = segments.findIndex(seg => seg.id === chosenOffer.id);
+    selectedOfferId = chosenOffer.id;
+    
+    // Calculate rotation for clockwise spin
+    const segmentCenterAngle = chosenIndex * anglePerSegment + (anglePerSegment / 2);
+    const fullRotations = 5;
+    const rotationAngle = (fullRotations * 360) + (360 - segmentCenterAngle);
+    
+    // Apply rotation
+    wheel.style.transition = 'transform 4s cubic-bezier(0.17, 0.67, 0.12, 0.99)';
+    wheel.style.transform = `rotate(${rotationAngle}deg)`;
+
+    // Debug output
+    console.log(`Spin ${spinCount + 1}/${spinBatchSize}:`, 
+               `Offer: ${chosenOffer.name} (${chosenOffer.percentage}%)`,
+               `Index: ${chosenIndex}`,
+               `Rotation: ${rotationAngle}°`);
+
+    // Play sounds
+    try {
+        spinSound.currentTime = 0;
+        spinSound.play();
+    } catch (e) {
+        console.log("Spin sound failed:", e);
+    }
+
+    // Update UI after spin
+    setTimeout(() => {
+        // Highlight the correct segment
+        document.querySelectorAll('.segment-label').forEach((el, i) => {
+            el.classList.toggle('selected', i === chosenIndex);
+        });
+
+        document.getElementById('selected-offer-input').value = selectedOfferId;
+        document.getElementById('winning-offer-name').textContent = chosenOffer.name;
+        document.getElementById('modal').style.display = 'flex';
+
+        spinSound.pause();
+        winSound.play();
+    }, 4000);
+
+    // Reset state
+    setTimeout(() => {
+        isSpinning = false;
+        spinButton.disabled = false;
+        spinCount++;
+    }, 4100);
+});
+// spinButton.addEventListener('click', async function(e) {
+//     if (isSpinning) return;
+//     isSpinning = true;
+//     e.preventDefault();
+//     spinButton.disabled = true;
+
+//     await unlockAudio();
+
+//     // Select a segment using weighted probability
+//     const chosenIndex = weightedRandom(segments);
+//     selectedOfferId = segments[chosenIndex].id;
+    
+//     // Calculate rotation for CLOCKWISE spin (positive rotation)
+//     // We need to adjust the target angle since we're spinning clockwise
+//     const segmentCenterAngle = (total - chosenIndex) * anglePerSegment - (anglePerSegment / 2);
+//     const fullRotations = 5; // Number of full spins before stopping
+//     const rotationAngle = (fullRotations * 360) + segmentCenterAngle;
+    
+//     // Apply the rotation (clockwise is positive rotation)
+//     wheel.style.transition = 'transform 4s cubic-bezier(0.17, 0.67, 0.12, 0.99)';
+//     wheel.style.transform = `rotate(${rotationAngle}deg)`;
+
+//     // Debug output
+//     console.log('Selected:', segments[chosenIndex].name, 
+//                '| Index:', chosenIndex,
+//                '| Center Angle:', segmentCenterAngle,
+//                '| Total Rotation:', rotationAngle);
+
+//     // Play spinning sound effect
+//     try {
+//         spinSound.currentTime = 0;
+//         spinSound.volume = 0.4;
+//         spinSound.loop = true;
+//         await spinSound.play();
+//     } catch (e) {
+//         console.log("Spin sound play failed:", e);
+//     }
+
+//     setTimeout(async () => {
+//         // Highlight the selected segment
+//         document.querySelectorAll('.segment-label').forEach((el, i) => {
+//             el.classList.toggle('selected', i === chosenIndex);
+//         });
+
+//         document.getElementById('selected-offer-input').value = selectedOfferId;
+
+//         try {
+//             spinSound.pause();
+//             spinSound.currentTime = 0;
+//             winSound.currentTime = 0;
+//             winSound.volume = 0.6;
+//             await winSound.play();
+//         } catch (e) {
+//             console.log("Win sound play failed:", e);
+//         }
+
+//         // Show modal with correct prize
+//         document.getElementById('winning-offer-name').textContent = segments[chosenIndex].name;
+//         document.getElementById('modal').style.display = 'flex';
+
+//     }, 4100);
+    
+//     setTimeout(() => {
+//         isSpinning = false;
+//         spinButton.disabled = false;
+//     }, 4100);
+// });
 
     // Also allow closing the modal to submit
     document.getElementById('close-modal-button').addEventListener('click', function(e) {

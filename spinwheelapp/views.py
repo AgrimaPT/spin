@@ -931,6 +931,8 @@ from django.http import JsonResponse
 #         'shop': shop
 #     })
 
+
+
 def scratch_card(request, shop_code=None):
     if shop_code:
         shop = get_object_or_404(ShopProfile, shop_code=shop_code)
@@ -980,3 +982,93 @@ def scratch_card(request, shop_code=None):
         'customer_phone': entry_data.get('phone', ''),
         'customer_bill': entry_data.get('bill_number', '')
     })
+
+# def scratch_card(request, shop_code=None):
+#     # Configuration - set your desired spin cycle length
+#     SPIN_CYCLE_LENGTH = 20  # Can be changed to 100 or any other number
+    
+#     if shop_code:
+#         shop = get_object_or_404(ShopProfile, shop_code=shop_code)
+#     else:
+#         if not request.user.is_authenticated:
+#             return redirect('login')
+#         shop = request.user.shopprofile
+    
+#     # Get the temporary entry
+#     temp_spin_id = request.session.get('temp_spin_id')
+#     if not temp_spin_id:
+#         return redirect('qr_entry_form', shop_code=shop.shop_code)
+    
+#     # Get all non-zero percentage offers for this shop
+#     offers = Offer.objects.filter(shop=shop, percentage__gt=0)
+    
+#     # Check if we need to initialize the spin cycle
+#     if 'spin_cycle' not in request.session or request.session.get('spin_shop_id') != shop.id:
+#         spin_cycle = []
+#         total_percentage = sum(o.percentage for o in offers)
+        
+#         # Validate percentages sum to 100%
+#         if total_percentage != 100:
+#             raise ValueError(f"Offer percentages must sum to 100% (current sum: {total_percentage}%)")
+        
+#         # Calculate exact counts for each offer
+#         for offer in offers:
+#             count = int((offer.percentage / 100) * SPIN_CYCLE_LENGTH)
+#             spin_cycle.extend([offer.id] * count)
+        
+#         # Verify we have exactly SPIN_CYCLE_LENGTH spins
+#         if len(spin_cycle) != SPIN_CYCLE_LENGTH:
+#             raise ValueError(
+#                 f"Generated {len(spin_cycle)} spins instead of {SPIN_CYCLE_LENGTH}. "
+#                 "Check your offer percentages sum to exactly 100%"
+#             )
+        
+#         # Shuffle the spin cycle
+#         random.shuffle(spin_cycle)
+        
+#         # Store in session
+#         request.session['spin_cycle'] = spin_cycle
+#         request.session['spin_index'] = 0
+#         request.session['spin_shop_id'] = shop.id
+#         request.session['spin_total'] = SPIN_CYCLE_LENGTH
+    
+#     # Get current spin info
+#     spin_index = request.session['spin_index']
+#     spin_cycle = request.session['spin_cycle']
+    
+#     # Get the current offer (should always exist since we validated percentages)
+#     current_offer_id = spin_cycle[spin_index]
+#     selected_offer = Offer.objects.get(id=current_offer_id)
+    
+#     if request.method == 'POST':
+#         # Save the result
+#         SpinEntry.objects.filter(id=temp_spin_id).update(offer=selected_offer)
+        
+#         # Move to next spin or end cycle
+#         if spin_index + 1 >= len(spin_cycle):
+#             # Clear all spin-related session data
+#             for key in ['spin_cycle', 'spin_index', 'spin_shop_id', 'spin_total', 'temp_spin_id', 'entry_data']:
+#                 if key in request.session:
+#                     del request.session[key]
+#         else:
+#             request.session['spin_index'] = spin_index + 1
+        
+#         if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+#             return JsonResponse({'status': 'success'})
+#         return redirect('qr_entry_form', shop_code=shop.shop_code)
+    
+#     # Pass data to template
+#     entry_data = request.session.get('entry_data', {})
+#     return render(request, 'scratch_card.html', {
+#         'selected_offer': selected_offer,
+#         'shop': shop,
+#         'customer_name': entry_data.get('name', ''),
+#         'customer_phone': entry_data.get('phone', ''),
+#         'customer_bill': entry_data.get('bill_number', ''),
+#         'spin_progress': {
+#             'current': spin_index + 1,
+#             'total': SPIN_CYCLE_LENGTH,
+#             'remaining': SPIN_CYCLE_LENGTH - (spin_index + 1),
+#             'cycle_length': SPIN_CYCLE_LENGTH
+#         }
+#     })

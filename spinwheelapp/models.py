@@ -11,7 +11,7 @@ class ShopProfile(models.Model):
     shop_name = models.CharField(max_length=100)
     shop_code = models.CharField(max_length=10, unique=True)
     whatsapp_number = models.CharField(
-        max_length=15,default="918848647616",
+        max_length=10,default="8848647616",
         validators=[RegexValidator(r'^[0-9]+$', 'Enter a valid phone number')],
         help_text="WhatsApp number with country code (e.g. 919876543210)"
     )
