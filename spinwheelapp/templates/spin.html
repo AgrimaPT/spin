@@ -21,30 +21,9 @@
             --light-text: #f5f6fa;
             --shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
         }
-
-        /* body {
-            font-family: 'Poppins', sans-serif;
-            text-align: center;
-            padding: 0;
-            margin: 0;
-            background: #f9f9f9;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            background-color: #ffffff;
-            background-image: url("https://www.transparenttextures.com/patterns/cartographer.png");
-            background-repeat: repeat;
-            color: #333;
-            height: 100%;
-            width: 100%;
-            overflow-x: hidden;
-        } */
-
         
 
-        body {
+        /* body {
             font-family: 'Poppins', sans-serif;
             text-align: center;
             padding: 0;
@@ -72,7 +51,53 @@
             -webkit-font-smoothing: antialiased;
   -webkit-overflow-scrolling: touch;
             
-        }
+        } */
+
+
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            text-align: center;
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  min-height: -webkit-fill-available; /* For mobile browsers */
+  width: 100vw;
+  background: linear-gradient(135deg, #d5e7f1 0%, #addae3 100%);
+  background-attachment: fixed; /* This fixes the gradient repeating issue */
+  background-size: cover;
+  position: fixed; /* Prevents scrolling and ensures full coverage */
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Add this to handle mobile browser quirks */
+@supports (-webkit-touch-callout: none) {
+  body {
+    min-height: -webkit-fill-available;
+    height: -webkit-fill-available;
+  }
+}
+
+.container {
+  width: 100%;
+  max-width: 800px;
+  padding: 1rem;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  flex: 1;
+}
+
+#spin-button {
+  margin-top: auto; /* Pushes button to bottom */
+  margin-bottom: 20px; /* Adds some spacing */
+}
 
         body::before {
     content: '';
@@ -97,7 +122,7 @@
     }
 }
 
-        .container {
+        /* .container {
             max-width: 800px;
             padding: 2rem;
             margin: 0 auto;
@@ -108,7 +133,7 @@
     padding: 1rem;
     width: 100%;
     max-width: 100%;
-        }
+        } */
 
         *, *::before, *::after {
             box-sizing: inherit;
@@ -372,7 +397,9 @@
 
 
         #spin-button {
-            margin-top: 1rem;
+            /* margin-top: 1rem; */
+            margin-top: auto; /* Pushes button to bottom */
+  margin-bottom: 20px; /* Adds some spacing */
             padding: 18px 50px;
             font-size: 1.2rem;
             background: var(--secondary-gradient);
@@ -1221,4 +1248,3 @@ spinButton.addEventListener('click', async function(e) {
 </script>
 </body>
 </html>
-
