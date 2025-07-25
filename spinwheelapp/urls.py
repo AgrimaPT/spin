@@ -25,6 +25,6 @@ urlpatterns = [
 
     path('scratch-card/', views.scratch_card, name='scratch_card'),
     # path('scratch-card/success/', views.scratch_card_success, name='scratch_card_success'),
-    
+    path('redeem-entry/<int:entry_id>/', views.redeem_entry, name='redeem_entry'),
     
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -4,7 +4,7 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 import random
 from django.core.validators import RegexValidator
-
+import shortuuid
 
 class ShopProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
@@ -37,7 +37,7 @@ class ShopProfile(models.Model):
     
 class Offer(models.Model):
     shop = models.ForeignKey(ShopProfile, on_delete=models.CASCADE)
-    name = models.CharField(max_length=100)
+    name = models.CharField(max_length=15)
     color = models.CharField(max_length=7, default="#ffffff")
     percentage = models.FloatField(help_text="Probability percentage (e.g., 25.0)")
     def __str__(self):
@@ -45,6 +45,8 @@ class Offer(models.Model):
 
 
 class SpinEntry(models.Model):
+    short_id = models.CharField(max_length=8, unique=True, editable=False, null=True, blank=True)
+
     name = models.CharField(max_length=100)
     
     # offer = models.ForeignKey(Offer, on_delete=models.CASCADE)
@@ -52,13 +54,19 @@ class SpinEntry(models.Model):
     shop = models.ForeignKey(ShopProfile, on_delete=models.CASCADE)
     timestamp = models.DateTimeField(auto_now_add=True)
     bill_number = models.CharField(max_length=50, blank=True, null=True,default=None )
-    
+    is_redeemed = models.BooleanField(default=False)
+
     phone = models.CharField(max_length=10, validators=[
         RegexValidator(
             regex=r'^[6-9]\d{9}$',
             message="Enter a valid  phone number"
         )
     ])
+
+    def save(self, *args, **kwargs):
+        if not self.short_id:
+            self.short_id = shortuuid.ShortUUID().random(length=8)  # e.g., "AbC12XyZ"
+        super().save(*args, **kwargs)
 
     class Meta:
         constraints = [
@@ -102,6 +110,11 @@ class ShopSettings(models.Model):
         max_length=2,
         choices=GameType.choices,
         default=GameType.SPIN_WHEEL
+    )
+
+    allow_multiple_entries_per_phone = models.BooleanField(
+        default=True,
+        help_text="Allow the same phone number to spin multiple times per day (only applicable when bill number is not required)"
     )
     
     def __str__(self):

@@ -156,6 +156,22 @@
                                     </ul>
                                 {% endif %}
                             </div>
+
+                            <!-- Add this after the shop_name field -->
+                            <div class="form-group">
+                                <label for="id_whatsapp_number">WhatsApp Number</label>
+                                <input type="text" class="form-control" id="id_whatsapp_number" name="whatsapp_number" 
+                                    value="{{ form.whatsapp_number.value}}" required
+                                    pattern="[0-9]{10}" title="10 digit number without country code">
+                                {% if form.whatsapp_number.errors %}
+                                    <ul class="errorlist">
+                                        {% for error in form.whatsapp_number.errors %}
+                                        <li>{{ error }}</li>
+                                        {% endfor %}
+                                    </ul>
+                                {% endif %}
+                                <small class="text-muted">10-digit WhatsApp number customers can contact you at</small>
+                            </div>
                             
                             <!-- Add any additional fields here if needed -->
                             
