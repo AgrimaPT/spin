@@ -52,76 +52,165 @@ class ShopSignupForm(UserCreationForm):
             )
         return user
     
+# class SpinEntryForm(forms.Form):
+#     name = forms.CharField(
+#         widget=forms.TextInput(attrs={'class': 'form-control'})
+#     )
+#     phone = forms.CharField(
+#         validators=[
+#             RegexValidator(
+#                 regex=r'^[6-9]\d{9}$',
+#                 message="Please enter a valid 10-digit mobile number"
+#             )
+#         ],
+#         widget=forms.TextInput(attrs={
+#             'class': 'form-control',
+#             'pattern': '[6-9][0-9]{9}'
+#         })
+#     )
+#     shop_code = forms.CharField(widget=forms.HiddenInput())
+#     bill_number = forms.CharField(
+#         required=False,
+#         widget=forms.TextInput(attrs={
+#             'class': 'form-control',
+#             'placeholder': 'Bill Number (Optional)'
+#         })
+#     )
+
+#     def __init__(self, *args, **kwargs):
+#         self.require_bill = kwargs.pop('require_bill', False)
+#         self.shop = kwargs.pop('shop', None)
+#         super(SpinEntryForm, self).__init__(*args, **kwargs)
+        
+#         if self.require_bill:
+#             self.fields['bill_number'].required = True
+#             self.fields['bill_number'].widget.attrs['placeholder'] = 'Bill Number (Required)'
+#             self.fields['bill_number'].help_text = "Each bill number can only be used once"
+
+#     def clean_bill_number(self):
+#         bill_number = self.cleaned_data.get('bill_number')
+#         shop_code = self.cleaned_data.get('shop_code')
+        
+#         if self.require_bill and bill_number:
+#             if not self.shop and shop_code:
+#                 self.shop = ShopProfile.objects.filter(shop_code=shop_code).first()
+            
+#             if self.shop:
+#                 if SpinEntry.objects.filter(shop=self.shop, bill_number=bill_number).exists():
+#                     raise forms.ValidationError(
+#                         "This bill number has already been used."
+#                     )
+#         return bill_number
+    
+        
+#     def clean_phone(self):
+#         phone = self.cleaned_data.get('phone')
+#         shop_code = self.cleaned_data.get('shop_code')
+        
+#         if not self.shop and shop_code:
+#             self.shop = ShopProfile.objects.filter(shop_code=shop_code).first()
+            
+#         if self.shop:
+#             shop_settings = ShopSettings.objects.filter(shop=self.shop).first()
+#             if shop_settings and not shop_settings.require_bill_number and not shop_settings.allow_multiple_entries_per_phone:
+#                 today = timezone.now().date()
+#                 if SpinEntry.objects.filter(
+#                     shop=self.shop,
+#                     phone=phone,
+#                     timestamp__date=today
+#                 ).exists():
+#                     raise forms.ValidationError(
+#                         "You have already participated today. Only one entry per day is allowed."
+#                     )
+#         return phone
+
+
+
 class SpinEntryForm(forms.Form):
     name = forms.CharField(
-        widget=forms.TextInput(attrs={'class': 'form-control'})
+        widget=forms.TextInput(attrs={'class': 'form-control'}),
+        label="Full Name"
     )
     phone = forms.CharField(
         validators=[
             RegexValidator(
                 regex=r'^[6-9]\d{9}$',
-                message="Please enter a valid 10-digit mobile number"
+                message="Please enter a valid 10-digit Indian mobile number"
             )
         ],
         widget=forms.TextInput(attrs={
             'class': 'form-control',
-            'pattern': '[6-9][0-9]{9}'
-        })
+            'pattern': '[6-9][0-9]{9}',
+            'placeholder': '98XXXXXXXX'
+        }),
+        label="Mobile Number"
     )
     shop_code = forms.CharField(widget=forms.HiddenInput())
     bill_number = forms.CharField(
         required=False,
         widget=forms.TextInput(attrs={
             'class': 'form-control',
-            'placeholder': 'Bill Number (Optional)'
-        })
+            'placeholder': 'Bill Number'
+        }),
+        label="Bill Number"
     )
 
     def __init__(self, *args, **kwargs):
         self.require_bill = kwargs.pop('require_bill', False)
         self.shop = kwargs.pop('shop', None)
-        super(SpinEntryForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         
+        # Dynamically adjust bill number field based on shop requirements
         if self.require_bill:
             self.fields['bill_number'].required = True
             self.fields['bill_number'].widget.attrs['placeholder'] = 'Bill Number (Required)'
+            self.fields['bill_number'].widget.attrs['required'] = 'required'
             self.fields['bill_number'].help_text = "Each bill number can only be used once"
+        else:
+            # Remove the field entirely if not required
+            del self.fields['bill_number']
+
+    def clean(self):
+        cleaned_data = super().clean()
+        shop_code = cleaned_data.get('shop_code')
+        
+        # Ensure shop exists
+        if not self.shop and shop_code:
+            self.shop = get_object_or_404(ShopProfile, shop_code=shop_code)
+        
+        return cleaned_data
 
     def clean_bill_number(self):
-        bill_number = self.cleaned_data.get('bill_number')
-        shop_code = self.cleaned_data.get('shop_code')
-        
-        if self.require_bill and bill_number:
-            if not self.shop and shop_code:
-                self.shop = ShopProfile.objects.filter(shop_code=shop_code).first()
+        if not self.require_bill:
+            return None
             
-            if self.shop:
-                if SpinEntry.objects.filter(shop=self.shop, bill_number=bill_number).exists():
-                    raise forms.ValidationError(
-                        "This bill number has already been used."
-                    )
+        bill_number = self.cleaned_data.get('bill_number')
+        
+        if self.require_bill and not bill_number:
+            raise forms.ValidationError("Bill number is required for this shop")
+            
+        if bill_number and self.shop:
+            if SpinEntry.objects.filter(shop=self.shop, bill_number=bill_number).exists():
+                raise forms.ValidationError("This bill number has already been used")
+        
         return bill_number
     
-        
     def clean_phone(self):
         phone = self.cleaned_data.get('phone')
-        shop_code = self.cleaned_data.get('shop_code')
         
-        if not self.shop and shop_code:
-            self.shop = ShopProfile.objects.filter(shop_code=shop_code).first()
-            
         if self.shop:
-            shop_settings = ShopSettings.objects.filter(shop=self.shop).first()
-            if shop_settings and not shop_settings.require_bill_number and not shop_settings.allow_multiple_entries_per_phone:
-                today = timezone.now().date()
-                if SpinEntry.objects.filter(
-                    shop=self.shop,
-                    phone=phone,
-                    timestamp__date=today
-                ).exists():
-                    raise forms.ValidationError(
-                        "You have already participated today. Only one entry per day is allowed."
-                    )
+            shop_settings = getattr(self.shop, 'shopsettings', None)
+            if shop_settings:
+                if not shop_settings.require_bill_number and not shop_settings.allow_multiple_entries_per_phone:
+                    today = timezone.now().date()
+                    if SpinEntry.objects.filter(
+                        shop=self.shop,
+                        phone=phone,
+                        timestamp__date=today
+                    ).exists():
+                        raise forms.ValidationError(
+                            "You have already participated today. Only one entry per day is allowed."
+                        )
         return phone
 
 # class ShopProfileForm(forms.ModelForm):
@@ -148,7 +237,7 @@ class ShopProfileForm(forms.ModelForm):
     
     class Meta:
         model = ShopProfile
-        fields = ['shop_name', 'whatsapp_number', 'shop_code']  # Include whatsapp_number
+        fields = ['shop_name', 'whatsapp_number']  # Include whatsapp_number
         widgets = {
             'shop_code': forms.TextInput(attrs={'readonly': 'readonly'})  # Keep shop_code read-only
         }
@@ -163,6 +252,36 @@ class ShopProfileForm(forms.ModelForm):
 #             'game_type': forms.RadioSelect(choices=GameType.choices)
 #         }
 
+# class ShopSettingsForm(forms.ModelForm):
+#     class Meta:
+#         model = ShopSettings
+#         fields = ['game_type', 'require_bill_number', 'require_social_verification',
+#                  'require_screenshot', 'instagram_url', 'google_review_url',
+#                  'allow_multiple_entries_per_phone']
+#         widgets = {
+#             'game_type': forms.RadioSelect(),
+#         }
+
+#     def clean(self):
+#         cleaned_data = super().clean()
+#         require_social = cleaned_data.get('require_social_verification')
+#         instagram_url = cleaned_data.get('instagram_url')
+#         google_review_url = cleaned_data.get('google_review_url')
+#         require_bill = cleaned_data.get('require_bill_number')
+
+#         # Social verification validation
+#         if require_social:
+#             if not instagram_url:
+#                 self.add_error('instagram_url', "Instagram URL is required when social verification is enabled")
+#             if not google_review_url:
+#                 self.add_error('google_review_url', "Google review URL is required when social verification is enabled")
+
+#         # Handle allow_multiple_entries_per_phone logic
+#         if require_bill:
+#             cleaned_data['allow_multiple_entries_per_phone'] = True
+
+#         return cleaned_data
+
 class ShopSettingsForm(forms.ModelForm):
     class Meta:
         model = ShopSettings
@@ -171,7 +290,15 @@ class ShopSettingsForm(forms.ModelForm):
                  'allow_multiple_entries_per_phone']
         widgets = {
             'game_type': forms.RadioSelect(),
+            'instagram_url': forms.URLInput(attrs={'placeholder': 'https://instagram.com/yourpage'}),
+            'google_review_url': forms.URLInput(attrs={'placeholder': 'https://g.page/r/Cxyz/review'})
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Make URLs not required by default, we'll handle in clean()
+        self.fields['instagram_url'].required = False
+        self.fields['google_review_url'].required = False
 
     def clean(self):
         cleaned_data = super().clean()
@@ -186,6 +313,10 @@ class ShopSettingsForm(forms.ModelForm):
                 self.add_error('instagram_url', "Instagram URL is required when social verification is enabled")
             if not google_review_url:
                 self.add_error('google_review_url', "Google review URL is required when social verification is enabled")
+            else:
+                # Validate Google review URL format
+                if "g.page" not in google_review_url and "maps.app.goo.gl" not in google_review_url:
+                    self.add_error('google_review_url', "Please enter a valid Google Maps review URL")
 
         # Handle allow_multiple_entries_per_phone logic
         if require_bill:

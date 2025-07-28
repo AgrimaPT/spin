@@ -203,7 +203,7 @@
                                 <small class="d-block text-muted">Customer must upload screenshots as proof</small>
                             </div>
 
-                            <div class="mb-3">
+                            <!-- <div class="mb-3">
                                 <label for="instagram_url" class="form-label fw-medium">Instagram Page URL</label>
                                 <input type="url" class="form-control" name="instagram_url" id="instagram_url"
                                        value="{{ settings.instagram_url|default:'' }}"
@@ -217,7 +217,39 @@
                                        value="{{ settings.google_review_url|default:'' }}"
                                        placeholder="https://g.page/r/Cxyz/review" required>
                                 <small class="text-muted">Customers will be redirected here for reviews</small>
-                            </div>
+                            </div> -->
+
+                            <div class="mb-3">
+    <label for="instagram_url" class="form-label fw-medium">Instagram Page URL</label>
+    <input type="url" class="form-control {% if form.instagram_url.errors %}is-invalid{% endif %}" 
+           name="instagram_url" id="instagram_url"
+           value="{{ form.instagram_url.value|default:'' }}"
+           placeholder="https://instagram.com/yourpage">
+    {% if form.instagram_url.errors %}
+        <div class="invalid-feedback">
+            {% for error in form.instagram_url.errors %}
+                {{ error }}
+            {% endfor %}
+        </div>
+    {% endif %}
+    <small class="text-muted">Customers will follow this link for verification</small>
+</div>
+
+<div class="mb-3">
+    <label for="google_review_url" class="form-label fw-medium">Google Review URL</label>
+    <input type="url" class="form-control {% if form.google_review_url.errors %}is-invalid{% endif %}" 
+           name="google_review_url" id="google_review_url"
+           value="{{ form.google_review_url.value|default:'' }}"
+           placeholder="https://g.page/r/Cxyz/review">
+    {% if form.google_review_url.errors %}
+        <div class="invalid-feedback">
+            {% for error in form.google_review_url.errors %}
+                {{ error }}
+            {% endfor %}
+        </div>
+    {% endif %}
+    <small class="text-muted">Customers will be redirected here for reviews</small>
+</div>
                         </div>
 
                         <!-- Form Actions -->

@@ -63,6 +63,8 @@ class SpinEntry(models.Model):
         )
     ])
 
+    
+
     def save(self, *args, **kwargs):
         if not self.short_id:
             self.short_id = shortuuid.ShortUUID().random(length=8)  # e.g., "AbC12XyZ"
@@ -76,6 +78,8 @@ class SpinEntry(models.Model):
                 condition=models.Q(bill_number__isnull=False) & ~models.Q(bill_number=''),
             )
         ]
+
+    
 
     def __str__(self):
         return f"{self.name} - {self.offer.name if self.offer else 'No Offer'} ({self.timestamp.date()})"

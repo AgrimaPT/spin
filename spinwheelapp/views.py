@@ -310,61 +310,191 @@ def delete_offer(request, offer_id):
 #     })
 
 
+# def qr_entry_form(request, shop_code):
+#     shop = get_object_or_404(ShopProfile, shop_code=shop_code)
+#     shop_settings, created = ShopSettings.objects.get_or_create(shop=shop)
+    
+#     if request.method == 'POST':
+#         form = SpinEntryForm(request.POST, require_bill=shop_settings.require_bill_number, shop=shop)
+#         if form.is_valid():
+#             try:
+#                 with transaction.atomic():
+#                     spin_entry = SpinEntry(
+#                         name=form.cleaned_data['name'],
+#                         phone=form.cleaned_data['phone'],
+#                         shop=shop,
+#                         bill_number=form.cleaned_data.get('bill_number', '')
+#                     )
+#                     spin_entry.save()
+                    
+#                     # Store in session
+#                     request.session['temp_spin_id'] = spin_entry.id
+#                     request.session['entry_data'] = {
+#                         'name': form.cleaned_data['name'],
+#                         'phone': form.cleaned_data['phone'],
+#                         'bill_number': form.cleaned_data.get('bill_number', '')
+#                     }
+#                     request.session['shop_code'] = shop_code
+#                     request.session.save()  # Explicit save
+                    
+                    
+#                     # Handle redirection based on settings
+#                     if shop_settings.require_social_verification:
+                       
+#                         return redirect('social_verification', shop_code=shop_code)
+                    
+                    
+#                     if shop_settings.game_type == 'SW':
+#                         return redirect('spin_page')
+#                     else:
+#                         return redirect('scratch_card')
+                        
+#             except Exception as e:
+                
+#                 messages.error(request, f"Error processing your entry: {str(e)}")
+        
+#     else:
+#         form = SpinEntryForm(initial={'shop_code': shop_code}, 
+#                            require_bill=shop_settings.require_bill_number,
+#                            shop=shop)
+    
+#     return render(request, 'form.html', {
+#         'form': form,
+#         'shop': shop,
+#         'shop_settings': shop_settings
+#     })
+
+# def qr_entry_form(request, shop_code):
+#     shop = get_object_or_404(ShopProfile, shop_code=shop_code)
+#     shop_settings, created = ShopSettings.objects.get_or_create(shop=shop)
+    
+#     if request.method == 'POST':
+#         form = SpinEntryForm(request.POST, require_bill=shop_settings.require_bill_number, shop=shop)
+#         if form.is_valid():
+#             try:
+#                 with transaction.atomic():
+#                     spin_entry = SpinEntry(
+#                         name=form.cleaned_data['name'],
+#                         phone=form.cleaned_data['phone'],
+#                         shop=shop,
+#                         bill_number=form.cleaned_data.get('bill_number', '')
+#                     )
+#                     spin_entry.save()
+                    
+#                     # Store in session
+#                     request.session['temp_spin_id'] = spin_entry.id
+#                     request.session['entry_data'] = {
+#                         'name': form.cleaned_data['name'],
+#                         'phone': form.cleaned_data['phone'],
+#                         'bill_number': form.cleaned_data.get('bill_number', '')
+#                     }
+#                     request.session['shop_code'] = shop_code
+#                     request.session.modified = True  # Explicitly mark as modified
+                    
+#                     print(f"Form valid - redirecting to game. Shop settings: {shop_settings.game_type}")
+                    
+#                     # Handle redirection based on settings
+#                     if shop_settings.require_social_verification:
+#                         return redirect('social_verification', shop_code=shop_code)
+                    
+#                     if shop_settings.game_type == 'SW':
+#                         return redirect('spin_page')
+#                     else:
+#                         return redirect('scratch_card')
+                        
+#             except Exception as e:
+#                 print(f"Error saving entry: {str(e)}")
+#                 messages.error(request, f"Error processing your entry: {str(e)}")
+#         else:
+#             print(f"Form invalid. Errors: {form.errors}")  # Debug form errors
+#             messages.error(request, "Please correct the form errors")
+#     else:
+#         form = SpinEntryForm(initial={'shop_code': shop_code}, 
+#                            require_bill=shop_settings.require_bill_number,
+#                            shop=shop)
+    
+#     return render(request, 'form.html', {
+#         'form': form,
+#         'shop': shop,
+#         'shop_settings': shop_settings
+#     })
+
+
 def qr_entry_form(request, shop_code):
     shop = get_object_or_404(ShopProfile, shop_code=shop_code)
-    shop_settings, created = ShopSettings.objects.get_or_create(shop=shop)
+    shop_settings = ShopSettings.objects.get_or_create(shop=shop)[0]  # Ensures we get the object
     
     if request.method == 'POST':
-        form = SpinEntryForm(request.POST, require_bill=shop_settings.require_bill_number, shop=shop)
+        form = SpinEntryForm(
+            request.POST, 
+            require_bill=shop_settings.require_bill_number,
+            shop=shop
+        )
+        
         if form.is_valid():
             try:
                 with transaction.atomic():
+                    # Create the spin entry
                     spin_entry = SpinEntry(
                         name=form.cleaned_data['name'],
                         phone=form.cleaned_data['phone'],
                         shop=shop,
-                        bill_number=form.cleaned_data.get('bill_number', '')
+                        bill_number=form.cleaned_data.get('bill_number')  # Returns None if field was removed
                     )
                     spin_entry.save()
                     
                     # Store in session
-                    request.session['temp_spin_id'] = spin_entry.id
-                    request.session['entry_data'] = {
-                        'name': form.cleaned_data['name'],
-                        'phone': form.cleaned_data['phone'],
-                        'bill_number': form.cleaned_data.get('bill_number', '')
-                    }
-                    request.session['shop_code'] = shop_code
-                    request.session.save()  # Explicit save
+                    request.session.update({
+                        'temp_spin_id': spin_entry.id,
+                        'entry_data': {
+                            'name': form.cleaned_data['name'],
+                            'phone': form.cleaned_data['phone'],
+                            'bill_number': spin_entry.bill_number  # Use the saved value
+                        },
+                        'shop_code': shop_code,
+                        'social_verified': False  # Initialize social verification status
+                    })
                     
+                    # Debug output
+                    print(f"Created entry ID: {spin_entry.id}")
+                    print(f"Bill number: {spin_entry.bill_number}")
                     
-                    # Handle redirection based on settings
+                    # Handle redirection
                     if shop_settings.require_social_verification:
-                       
+                        print("Redirecting to social verification")
                         return redirect('social_verification', shop_code=shop_code)
                     
+                    print(f"Redirecting to game type: {shop_settings.game_type}")
+                    return redirect(
+                        'spin_page' if shop_settings.game_type == 'SW' 
+                        else 'scratch_card'
+                    )
                     
-                    if shop_settings.game_type == 'SW':
-                        return redirect('spin_page')
-                    else:
-                        return redirect('scratch_card')
-                        
+            except IntegrityError as e:
+                logger.error(f"Integrity error saving entry: {str(e)}")
+                messages.error(request, "This entry appears to be a duplicate. Please check your details.")
             except Exception as e:
-                
-                messages.error(request, f"Error processing your entry: {str(e)}")
-        
+                logger.error(f"Error saving entry: {str(e)}")
+                messages.error(request, "An unexpected error occurred. Please try again.")
+        else:
+            logger.warning(f"Form invalid: {form.errors.as_json()}")
+            for field, errors in form.errors.items():
+                for error in errors:
+                    messages.error(request, f"{field.title()}: {error}")
     else:
-        form = SpinEntryForm(initial={'shop_code': shop_code}, 
-                           require_bill=shop_settings.require_bill_number,
-                           shop=shop)
+        form = SpinEntryForm(
+            initial={'shop_code': shop_code},
+            require_bill=shop_settings.require_bill_number,
+            shop=shop
+        )
     
-    return render(request, 'form.html', {
+    context = {
         'form': form,
         'shop': shop,
-        'shop_settings': shop_settings
-    })
-
-
+        'shop_settings': shop_settings,
+        'require_bill': shop_settings.require_bill_number,
+    }
+    return render(request, 'form.html', context)
 def build_segments(offers):
     total = len(offers)
     angle_step = 360 / total
