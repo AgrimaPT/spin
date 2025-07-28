@@ -102,8 +102,27 @@ class SpinEntryForm(forms.Form):
                     )
         return bill_number
     
-    
-    
+        
+    def clean_phone(self):
+        phone = self.cleaned_data.get('phone')
+        shop_code = self.cleaned_data.get('shop_code')
+        
+        if not self.shop and shop_code:
+            self.shop = ShopProfile.objects.filter(shop_code=shop_code).first()
+            
+        if self.shop:
+            shop_settings = ShopSettings.objects.filter(shop=self.shop).first()
+            if shop_settings and not shop_settings.require_bill_number and not shop_settings.allow_multiple_entries_per_phone:
+                today = timezone.now().date()
+                if SpinEntry.objects.filter(
+                    shop=self.shop,
+                    phone=phone,
+                    timestamp__date=today
+                ).exists():
+                    raise forms.ValidationError(
+                        "You have already participated today. Only one entry per day is allowed."
+                    )
+        return phone
 
 # class ShopProfileForm(forms.ModelForm):
 #     class Meta:
