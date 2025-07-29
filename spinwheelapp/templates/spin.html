@@ -1077,6 +1077,11 @@ spinButton.addEventListener('click', async function() {
         setupWheel();
         initWhatsAppClaim();
     });
+
+    window.onerror = function (msg, url, lineNo, columnNo, error) {
+        alert("JS error: " + msg + " at " + lineNo + ":" + columnNo);
+        return false;
+    };
 </script>
 </body>
 </html>

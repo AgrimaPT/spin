@@ -457,15 +457,15 @@ def qr_entry_form(request, shop_code):
                     })
                     
                     # Debug output
-                    print(f"Created entry ID: {spin_entry.id}")
-                    print(f"Bill number: {spin_entry.bill_number}")
+                    # print(f"Created entry ID: {spin_entry.id}")
+                    # print(f"Bill number: {spin_entry.bill_number}")
                     
                     # Handle redirection
                     if shop_settings.require_social_verification:
-                        print("Redirecting to social verification")
+                        # print("Redirecting to social verification")
                         return redirect('social_verification', shop_code=shop_code)
                     
-                    print(f"Redirecting to game type: {shop_settings.game_type}")
+                    # print(f"Redirecting to game type: {shop_settings.game_type}")
                     return redirect(
                         'spin_page' if shop_settings.game_type == 'SW' 
                         else 'scratch_card'
