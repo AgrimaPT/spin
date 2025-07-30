@@ -11,7 +11,7 @@ class ShopProfile(models.Model):
     shop_name = models.CharField(max_length=100)
     shop_code = models.CharField(max_length=10, unique=True)
     whatsapp_number = models.CharField(
-        max_length=10,default="8848647616",
+        max_length=12,default="8848647616",
         validators=[RegexValidator(r'^[0-9]+$', 'Enter a valid phone number')],
         help_text="WhatsApp number with country code (e.g. 919876543210)"
     )
@@ -89,53 +89,131 @@ class GameType(models.TextChoices):
     SCRATCH_CARD = 'SC', 'Scratch Card'
 
 
+# class ShopSettings(models.Model):
+#     shop = models.OneToOneField(ShopProfile, on_delete=models.CASCADE)
 
+#     require_bill_number = models.BooleanField(
+#         default=False,
+#         help_text="Enable to require bill number for spin entries"
+#     )
+
+#     require_social_verification = models.BooleanField(
+#         default=False,
+#         help_text="Enable to require social media verification before spinning"
+#     )
+
+#     require_screenshot = models.BooleanField(
+#         default=False,
+#         help_text="Enable to require screenshot proof for social verification"
+#     )
+
+#     instagram_url = models.URLField(blank=True, null=True)
+#     google_review_url = models.URLField(blank=True, null=True)
+
+#     game_type = models.CharField(
+#         max_length=2,
+#         choices=GameType.choices,
+#         default=GameType.SPIN_WHEEL
+#     )
+
+#     allow_multiple_entries_per_phone = models.BooleanField(
+#         default=True,
+#         help_text="Allow the same phone number to spin multiple times per day (only applicable when bill number is not required)"
+#     )
+    
+#     def __str__(self):
+#         return f"Settings for {self.shop.shop_name}-{self.shop.shop_code}"
+
+
+from django.core.validators import URLValidator
 
 class ShopSettings(models.Model):
     shop = models.OneToOneField(ShopProfile, on_delete=models.CASCADE)
-
-    require_bill_number = models.BooleanField(
-        default=False,
-        help_text="Enable to require bill number for spin entries"
-    )
-
-    require_social_verification = models.BooleanField(
-        default=False,
-        help_text="Enable to require social media verification before spinning"
-    )
-    require_screenshot = models.BooleanField(
-        default=False,
-        help_text="Enable to require screenshot proof for social verification"
-    )
-    instagram_url = models.URLField(blank=True, null=True)
-    google_review_url = models.URLField(blank=True, null=True)
-
+    
+    # Game Settings
     game_type = models.CharField(
         max_length=2,
         choices=GameType.choices,
         default=GameType.SPIN_WHEEL
     )
-
+    
+    # Entry Requirements
+    require_bill_number = models.BooleanField(
+        default=False,
+        help_text="Enable to require bill number for spin entries"
+    )
     allow_multiple_entries_per_phone = models.BooleanField(
         default=True,
         help_text="Allow the same phone number to spin multiple times per day (only applicable when bill number is not required)"
     )
     
-    def __str__(self):
-        return f"Settings for {self.shop.shop_name}-{self.shop.shop_code}"
+    # Social Verification Settings
+    enable_instagram_verification = models.BooleanField(
+        default=False,
+        help_text="Enable Instagram follow verification"
+    )
+    instagram_url = models.URLField(
+        blank=True,
+        null=True,
+        validators=[URLValidator(schemes=['http', 'https'])],
+        help_text="Your Instagram profile URL (required if Instagram verification is enabled)"
+    )
+    require_instagram_screenshot = models.BooleanField(
+        default=False,
+        help_text="Require screenshot proof for Instagram verification"
+    )
     
+    enable_google_review = models.BooleanField(
+        default=False,
+        help_text="Enable Google review verification"
+    )
+    google_review_url = models.URLField(
+        blank=True,
+        null=True,
+        validators=[URLValidator(schemes=['http', 'https'])],
+        help_text="Your Google review URL (required if Google review verification is enabled)"
+    )
+    require_google_screenshot = models.BooleanField(
+        default=False,
+        help_text="Require screenshot proof for Google review verification"
+    )
+    
+    def clean(self):
+        """Validate that URLs are provided when verification is enabled"""
+        from django.core.exceptions import ValidationError
+        
+        if self.enable_instagram_verification and not self.instagram_url:
+            raise ValidationError({
+                'instagram_url': "Instagram URL is required when Instagram verification is enabled"
+            })
+            
+        if self.enable_google_review and not self.google_review_url:
+            raise ValidationError({
+                'google_review_url': "Google review URL is required when Google review verification is enabled"
+            })
+
+    def requires_social_verification(self):
+        """Check if any social verification is enabled"""
+        return self.enable_instagram_verification or self.enable_google_review
+
+    def __str__(self):
+        return f"Settings for {self.shop.shop_name}"
+
+
 
 from django.core.validators import FileExtensionValidator
 
 class SocialVerification(models.Model):
     entry = models.OneToOneField(SpinEntry, on_delete=models.CASCADE, related_name='social_verification')
     instagram_screenshot = models.ImageField(
-        upload_to='verifications/instagram/%Y/%m/%d/',
+        upload_to='verifications/instagram/%Y/%m/%d/',blank=True,
+        null=True,
         validators=[FileExtensionValidator(allowed_extensions=['jpg', 'jpeg', 'png'])],
         help_text="Upload screenshot of Instagram follow"
     )
     google_review_screenshot = models.ImageField(
-        upload_to='verifications/google/%Y/%m/%d/',
+        upload_to='verifications/google/%Y/%m/%d/',blank=True,
+        null=True,
         validators=[FileExtensionValidator(allowed_extensions=['jpg', 'jpeg', 'png'])],
         help_text="Upload screenshot of Google review"
     )

@@ -871,6 +871,14 @@ canvas.confetti-canvas {
                 return;
             }
 
+            if (shopPhone.length === 10) {
+                shopPhone = '91' + shopPhone;
+            }
+            // If it starts with 0, remove the 0 and add 91
+            else if (shopPhone.length === 11 && shopPhone.startsWith('0')) {
+                shopPhone = '91' + shopPhone.substring(1);
+            }
+
             // const userData = {
             //     name: "{{ entry_data.name|escapejs }}",
             //     phone: "{{ entry_data.phone|escapejs }}",

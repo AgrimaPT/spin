@@ -5,22 +5,8 @@
     <div class="verification-card">
         <div class="verification-header">
             <h2 class="verification-title">Social Media Verification</h2>
-            <p class="verification-subtitle">Complete these quick steps to unlock your spin</p>
-            <!-- <div class="progress-steps">
-                <div class="step active">
-                    <span class="step-number">1</span>
-                    <span class="step-text">Enter Details</span>
-                </div>
-                <div class="step active">
-                    <span class="step-number">2</span>
-                    <span class="step-text">Social Verification</span>
-                </div>
-                <div class="step">
-                    <span class="step-number">3</span>
-                    <span class="step-text">Spin Wheel</span>
-                </div>
-            </div> -->
-
+            <p class="verification-subtitle">Complete these quick steps to unlock your game</p>
+            
             <div class="progress-steps">
                 <div class="step active">
                     <span class="step-number">1</span>
@@ -33,7 +19,7 @@
                 <div class="step">
                     <span class="step-number">3</span>
                     <span class="step-text">
-                        {% if shop_settings.game_type == 'SW' %}
+                        {% if settings.game_type == 'SW' %}
                             Spin Wheel
                         {% else %}
                             Scratch Card
@@ -48,7 +34,8 @@
                 {% csrf_token %}
                 
                 <div class="verification-grid">
-                    <!-- Instagram Section -->
+                    <!-- Instagram Section (only shown if enabled) -->
+                    {% if settings.enable_instagram_verification %}
                     <div class="verification-item instagram-item">
                         <div class="platform-icon">
                             <i class="fab fa-instagram"></i>
@@ -59,12 +46,13 @@
                             <i class="fas fa-external-link-alt"></i> Visit Instagram
                         </a>
                         
-                        {% if require_screenshot %}
+                        {% if settings.require_instagram_screenshot %}
                         <div class="upload-section">
                             <label class="upload-label" id="instagram-label">
                                 <i class="fas fa-cloud-upload-alt"></i>
                                 <span id="instagram-text">Upload Screenshot</span>
-                                <input type="file" name="instagram_screenshot" accept="image/*" required 
+                                <input type="file" name="instagram_screenshot" accept="image/*" 
+                                       {% if settings.require_instagram_screenshot %}required{% endif %}
                                        class="upload-input" id="instagram-input">
                             </label>
                             <small class="upload-hint">PNG or JPG, max 5MB</small>
@@ -72,8 +60,10 @@
                         </div>
                         {% endif %}
                     </div>
+                    {% endif %}
 
-                    <!-- Google Review Section -->
+                    <!-- Google Review Section (only shown if enabled) -->
+                    {% if settings.enable_google_review %}
                     <div class="verification-item google-item">
                         <div class="platform-icon">
                             <i class="fab fa-google"></i>
@@ -84,12 +74,13 @@
                             <i class="fas fa-external-link-alt"></i> Leave Review
                         </a>
                         
-                        {% if require_screenshot %}
+                        {% if settings.require_google_screenshot %}
                         <div class="upload-section">
                             <label class="upload-label" id="google-label">
                                 <i class="fas fa-cloud-upload-alt"></i>
                                 <span id="google-text">Upload Screenshot</span>
-                                <input type="file" name="google_screenshot" accept="image/*" required 
+                                <input type="file" name="google_screenshot" accept="image/*" 
+                                       {% if settings.require_google_screenshot %}required{% endif %}
                                        class="upload-input" id="google-input">
                             </label>
                             <small class="upload-hint">PNG or JPG, max 5MB</small>
@@ -97,7 +88,17 @@
                         </div>
                         {% endif %}
                     </div>
+                    {% endif %}
                 </div>
+
+                <!-- Error messages -->
+                <!-- {% if messages %}
+                <div class="alert alert-danger">
+                    {% for message in messages %}
+                    <p>{{ message }}</p>
+                    {% endfor %}
+                </div>
+                {% endif %} -->
 
                 <div class="verification-footer">
                     <button type="submit" class="btn btn-primary btn-verify">
@@ -133,10 +134,9 @@
         align-items: center;
         justify-content: center;
         padding: 2rem;
-        
+        background-color: #f5f7fa;
     }
     
-
     .verification-card {
         background: white;
         border-radius: var(--border-radius);
@@ -219,8 +219,6 @@
         grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
         gap: 1.5rem;
         margin-bottom: 2rem;
-        overflow: hidden; /* Prevent overflow */
-        width: 100%;
     }
 
     .verification-item {
@@ -228,11 +226,8 @@
         border-radius: var(--border-radius);
         border: 1px solid rgba(0, 0, 0, 0.05);
         transition: transform 0.3s ease, box-shadow 0.3s ease;
-        max-width: 100%; /* Prevent items from growing beyond container */
-        box-sizing: border-box;
     }
 
-    
     .verification-item:hover {
         transform: translateY(-5px);
         box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
@@ -358,8 +353,6 @@
         background: #f8f9fa;
         border-radius: var(--border-radius);
         display: none;
-        max-width: 100%; /* Ensure preview doesn't overflow */
-        overflow: hidden; 
     }
 
     .file-preview.show {
@@ -378,19 +371,13 @@
         font-size: 1.2rem;
     }
 
-    /* .file-name {
+    .file-name {
         flex-grow: 1;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
         font-size: 0.9rem;
-    } */
-     .file-name {
-    max-width: calc(100% - 50px); /* Leave space for icons */
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
+    }
 
     .file-remove {
         color: var(--error-color);
@@ -434,6 +421,15 @@
         color: var(--success-color);
     }
 
+    .alert-danger {
+        background-color: #f8d7da;
+        color: #721c24;
+        padding: 1rem;
+        border-radius: var(--border-radius);
+        margin-bottom: 1.5rem;
+        border: 1px solid #f5c6cb;
+    }
+
     @keyframes fadeIn {
         from { opacity: 0; transform: translateY(5px); }
         to { opacity: 1; transform: translateY(0); }
@@ -460,37 +456,25 @@
             width: 20px;
             right: -10px;
         }
+    }
 
+    @media (max-width: 480px) {
         .verification-grid {
             grid-template-columns: 1fr;
         }
+        
         .verification-item {
-        padding: 1rem; /* Reduce padding on mobile */
-    }
-    
-    .upload-label {
-        padding: 1rem; /* Reduce upload area padding */
-    }
-    
-    .file-preview {
-        padding: 8px; /* Reduce preview padding */
-    }
-
-
-    @media (max-width: 480px) {
-    .verification-item {
-        padding: 0.8rem; /* Further reduce padding */
-    }
-    
-    .btn {
-        padding: 0.5rem 1rem; /* Adjust button padding */
-        font-size: 0.9rem; /* Smaller button text */
-    }
-    
-    .platform-title {
-        font-size: 1.1rem; /* Adjust title size */
-    }
-}
+            padding: 1rem;
+        }
+        
+        .btn {
+            padding: 0.5rem 1rem;
+            font-size: 0.9rem;
+        }
+        
+        .platform-title {
+            font-size: 1.1rem;
+        }
     }
 </style>
 
@@ -515,10 +499,26 @@ document.addEventListener('DOMContentLoaded', function() {
         inputElement.addEventListener('change', function(e) {
             const file = e.target.files[0];
             if (file) {
+                // Validate file size (5MB max)
+                if (file.size > 5 * 1024 * 1024) {
+                    alert('File size exceeds 5MB limit');
+                    inputElement.value = '';
+                    return;
+                }
+
+                // Validate file type
+                const validTypes = ['image/jpeg', 'image/png', 'image/jpg'];
+                if (!validTypes.includes(file.type)) {
+                    alert('Only JPG and PNG files are allowed');
+                    inputElement.value = '';
+                    return;
+                }
+
                 // Update UI
                 const fileName = file.name.length > 20 
-    ? file.name.substring(0, 19) + '...' + file.name.substring(file.name.lastIndexOf('.'))
-    : file.name;
+                    ? file.name.substring(0, 19) + '...' + file.name.substring(file.name.lastIndexOf('.'))
+                    : file.name;
+                
                 textElement.textContent = 'Change File';
                 previewElement.innerHTML = `
                     <div class="file-info">

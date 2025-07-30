@@ -220,19 +220,19 @@ class SpinEntryForm(forms.Form):
 
 class ShopProfileForm(forms.ModelForm):
     whatsapp_number = forms.CharField(
-        max_length=10,
+        max_length=12,
         required=True,
         validators=[
             RegexValidator(
-                regex=r'^[0-9]{10}$',
-                message="Enter a valid 10-digit WhatsApp number without country code"
+                regex=r'^[0-9]{12}$',
+                message="Enter a valid WhatsApp number with country code"
             )
         ],
         widget=forms.TextInput(attrs={
             'class': 'form-control',
-            'placeholder': '10-digit WhatsApp number'
+            'placeholder': 'WhatsApp number'
         }),
-        help_text="10-digit number"
+        help_text="WhatsApp number"
     )
     
     class Meta:
@@ -282,44 +282,99 @@ class ShopProfileForm(forms.ModelForm):
 
 #         return cleaned_data
 
+# class ShopSettingsForm(forms.ModelForm):
+#     class Meta:
+#         model = ShopSettings
+#         fields = ['game_type', 'require_bill_number', 'require_social_verification',
+#                  'require_screenshot', 'instagram_url', 'google_review_url',
+#                  'allow_multiple_entries_per_phone']
+#         widgets = {
+#             'game_type': forms.RadioSelect(),
+#             'instagram_url': forms.URLInput(attrs={'placeholder': 'https://instagram.com/yourpage'}),
+#             'google_review_url': forms.URLInput(attrs={'placeholder': 'https://g.page/r/Cxyz/review'})
+#         }
+
+#     def __init__(self, *args, **kwargs):
+#         super().__init__(*args, **kwargs)
+#         # Make URLs not required by default, we'll handle in clean()
+#         self.fields['instagram_url'].required = False
+#         self.fields['google_review_url'].required = False
+
+#     def clean(self):
+#         cleaned_data = super().clean()
+#         require_social = cleaned_data.get('require_social_verification')
+#         instagram_url = cleaned_data.get('instagram_url')
+#         google_review_url = cleaned_data.get('google_review_url')
+#         require_bill = cleaned_data.get('require_bill_number')
+
+#         # Social verification validation
+#         if require_social:
+#             if not instagram_url:
+#                 self.add_error('instagram_url', "Instagram URL is required when social verification is enabled")
+#             if not google_review_url:
+#                 self.add_error('google_review_url', "Google review URL is required when social verification is enabled")
+#             else:
+#                 # Validate Google review URL format
+#                 if "g.page" not in google_review_url and "maps.app.goo.gl" not in google_review_url:
+#                     self.add_error('google_review_url', "Please enter a valid Google Maps review URL")
+
+#         # Handle allow_multiple_entries_per_phone logic
+#         if require_bill:
+#             cleaned_data['allow_multiple_entries_per_phone'] = True
+
+#         return cleaned_data
+
 class ShopSettingsForm(forms.ModelForm):
     class Meta:
         model = ShopSettings
-        fields = ['game_type', 'require_bill_number', 'require_social_verification',
-                 'require_screenshot', 'instagram_url', 'google_review_url',
-                 'allow_multiple_entries_per_phone']
+        fields = [
+            'game_type',
+            'require_bill_number',
+            'allow_multiple_entries_per_phone',
+            'enable_instagram_verification',
+            'instagram_url',
+            'require_instagram_screenshot',
+            'enable_google_review',
+            'google_review_url',
+            'require_google_screenshot'
+        ]
         widgets = {
             'game_type': forms.RadioSelect(),
-            'instagram_url': forms.URLInput(attrs={'placeholder': 'https://instagram.com/yourpage'}),
-            'google_review_url': forms.URLInput(attrs={'placeholder': 'https://g.page/r/Cxyz/review'})
+            'instagram_url': forms.URLInput(attrs={
+                'placeholder': 'https://instagram.com/yourpage',
+                'class': 'form-control'
+            }),
+            'google_review_url': forms.URLInput(attrs={
+                'placeholder': 'https://g.page/r/Cxyz/review',
+                'class': 'form-control'
+            })
         }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # Make URLs not required by default, we'll handle in clean()
+        # Initialize fields as not required (will be validated in clean())
         self.fields['instagram_url'].required = False
         self.fields['google_review_url'].required = False
 
     def clean(self):
         cleaned_data = super().clean()
-        require_social = cleaned_data.get('require_social_verification')
-        instagram_url = cleaned_data.get('instagram_url')
-        google_review_url = cleaned_data.get('google_review_url')
-        require_bill = cleaned_data.get('require_bill_number')
-
-        # Social verification validation
-        if require_social:
-            if not instagram_url:
-                self.add_error('instagram_url', "Instagram URL is required when social verification is enabled")
-            if not google_review_url:
-                self.add_error('google_review_url', "Google review URL is required when social verification is enabled")
-            else:
-                # Validate Google review URL format
-                if "g.page" not in google_review_url and "maps.app.goo.gl" not in google_review_url:
-                    self.add_error('google_review_url', "Please enter a valid Google Maps review URL")
-
+        
+        # Instagram validation
+        if cleaned_data.get('enable_instagram_verification'):
+            if not cleaned_data.get('instagram_url'):
+                self.add_error('instagram_url', "Instagram URL is required when Instagram verification is enabled")
+            if not cleaned_data.get('require_instagram_screenshot'):
+                cleaned_data['require_instagram_screenshot'] = False
+        
+        # Google validation
+        if cleaned_data.get('enable_google_review'):
+            if not cleaned_data.get('google_review_url'):
+                self.add_error('google_review_url', "Google review URL is required when Google review verification is enabled")
+            if not cleaned_data.get('require_google_screenshot'):
+                cleaned_data['require_google_screenshot'] = False
+        
         # Handle allow_multiple_entries_per_phone logic
-        if require_bill:
+        if cleaned_data.get('require_bill_number'):
             cleaned_data['allow_multiple_entries_per_phone'] = True
 
         return cleaned_data

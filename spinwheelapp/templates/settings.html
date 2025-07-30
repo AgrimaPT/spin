@@ -4,12 +4,9 @@
     <meta charset="UTF-8">
     <title>Settings - SpinWheel Admin</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-
     <!-- Bootstrap & Font Awesome -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-
-    <!-- Custom Styles -->
     <style>
         :root {
             --primary: #4e73df;
@@ -18,42 +15,21 @@
             --light: #f8f9fa;
             --dark: #5a5c69;
         }
-
         body {
             background-color: var(--light);
             font-family: 'Nunito', sans-serif;
         }
-
         .settings-card {
             border: none;
             border-radius: 0.35rem;
             box-shadow: 0 0.15rem 1.75rem rgba(58, 59, 69, 0.15);
         }
-
-        .form-switch .form-check-input {
-            width: 2.5em;
-            height: 1.25em;
-        }
-
-        .form-control, .form-select {
+        .verification-section {
+            background-color: rgba(78, 115, 223, 0.05);
             border-radius: 0.35rem;
-            border: 1px solid var(--gray);
+            padding: 1rem;
+            margin-top: 1rem;
         }
-
-        .form-control:focus, .form-select:focus {
-            border-color: var(--primary);
-            box-shadow: 0 0 0 0.2rem rgba(78, 115, 223, 0.25);
-        }
-
-        .btn-primary {
-            background-color: var(--primary);
-            border-color: var(--primary);
-        }
-
-        .btn-primary:hover {
-            background-color: var(--primary-dark);
-        }
-
         .section-title {
             font-size: 1rem;
             font-weight: 600;
@@ -62,27 +38,9 @@
             border-bottom: 1px solid var(--gray);
             padding-bottom: 0.5rem;
         }
-
-        #socialFields {
-            background-color: rgba(78, 115, 223, 0.05);
-            border-radius: 0.35rem;
-            padding: 1rem;
-            margin-top: 1rem;
-            display: none;
-        }
-
-        @media (max-width: 576px) {
-            .navbar-brand {
-                font-size: 1rem;
-            }
-            .card-header h4 {
-                font-size: 1rem;
-            }
-        }
     </style>
 </head>
 <body>
-
 <!-- Navbar -->
 <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow">
     <div class="container-fluid">
@@ -138,118 +96,120 @@
                             <label class="form-label fw-medium">Select Game Type</label>
                             <div class="form-check">
                                 <input class="form-check-input" type="radio" name="game_type" id="spinWheel"
-                                       value="SW" {% if settings.game_type == 'SW' %}checked{% endif %}>
+                                       value="SW" {% if form.game_type.value == 'SW' %}checked{% endif %}>
                                 <label class="form-check-label" for="spinWheel">
                                     <i class="fas fa-circle-notch me-2"></i> Spin Wheel
                                 </label>
                             </div>
                             <div class="form-check">
                                 <input class="form-check-input" type="radio" name="game_type" id="scratchCard"
-                                       value="SC" {% if settings.game_type == 'SC' %}checked{% endif %}>
+                                       value="SC" {% if form.game_type.value == 'SC' %}checked{% endif %}>
                                 <label class="form-check-label" for="scratchCard">
                                     <i class="fas fa-ticket-alt me-2"></i> Scratch Card
-
-
                                 </label>
                             </div>
-                            <small class="text-muted">Choose between spin wheel or scratch card for customer rewards</small>
                         </div>
 
-                        <!-- Require Bill -->
-                        <h5 class="section-title">Spin Requirements</h5>
+                        <!-- Entry Requirements -->
+                        <h5 class="section-title">Entry Requirements</h5>
                         <div class="form-check form-switch mb-3">
                             <input class="form-check-input" type="checkbox" id="require_bill_number"
-                                   name="require_bill_number" {% if settings.require_bill_number %}checked{% endif %}>
+                                   name="require_bill_number" {% if form.require_bill_number.value %}checked{% endif %}>
                             <label class="form-check-label fw-medium" for="require_bill_number">
-                                Require Bill Number for Spins
+                                Require Bill Number
                             </label>
                             <small class="d-block text-muted">Customers must enter a bill number to spin</small>
                         </div>
 
-                        <div id="multipleEntriesContainer" {% if settings.require_bill_number %}style="display: none;"{% endif %}>
-                                <div class="form-check form-switch mb-3">
-                                    <input class="form-check-input" type="checkbox" id="allow_multiple_entries"
-                                           name="allow_multiple_entries_per_phone" 
-                                           {% if settings.allow_multiple_entries_per_phone %}checked{% endif %}>
-                                    <label class="form-check-label fw-medium" for="allow_multiple_entries">
-                                        Allow Multiple Entries Per Phone
-                                    </label>
-                                    <small class="d-block text-muted">
-                                        When disabled, each phone number can only be used once per day
-                                    </small>
-                                </div>
+                        <div id="multipleEntriesContainer" {% if form.require_bill_number.value %}style="display: none;"{% endif %}>
+                            <div class="form-check form-switch mb-3">
+                                <input class="form-check-input" type="checkbox" id="allow_multiple_entries"
+                                       name="allow_multiple_entries_per_phone" 
+                                       {% if form.allow_multiple_entries_per_phone.value %}checked{% endif %}>
+                                <label class="form-check-label fw-medium" for="allow_multiple_entries">
+                                    Allow Multiple Entries Per Phone
+                                </label>
+                                <small class="d-block text-muted">
+                                    When disabled, each phone number can only be used once per day
+                                </small>
                             </div>
-
-                        <!-- Social Verification -->
-                        <div class="form-check form-switch mb-3">
-                            <input class="form-check-input" type="checkbox" id="require_social"
-                                   name="require_social_verification"
-                                   {% if settings.require_social_verification %}checked{% endif %}>
-                            <label class="form-check-label fw-medium" for="require_social">
-                                Enable Social Media Verification
-                            </label>
-                            <small class="d-block text-muted">Customer must verify social action before spinning</small>
                         </div>
 
-                        <!-- Social Fields -->
-                        <div id="socialFields" {% if settings.require_social_verification %}style="display: block;"{% endif %}>
+                        <!-- Instagram Verification -->
+                        <div class="verification-section mb-3">
                             <div class="form-check form-switch mb-3">
-                                <input class="form-check-input" type="checkbox" id="require_screenshot"
-                                       name="require_screenshot"
-                                       {% if settings.require_screenshot %}checked{% endif %}>
-                                <label class="form-check-label fw-medium" for="require_screenshot">
-                                    Require Screenshot Proof
+                                <input class="form-check-input" type="checkbox" id="enable_instagram_verification"
+                                       name="enable_instagram_verification" {% if form.enable_instagram_verification.value %}checked{% endif %}>
+                                <label class="form-check-label fw-medium" for="enable_instagram_verification">
+                                    Enable Instagram Verification
                                 </label>
-                                <small class="d-block text-muted">Customer must upload screenshots as proof</small>
+                                <small class="d-block text-muted">Customers must follow your Instagram page</small>
                             </div>
 
-                            <!-- <div class="mb-3">
-                                <label for="instagram_url" class="form-label fw-medium">Instagram Page URL</label>
-                                <input type="url" class="form-control" name="instagram_url" id="instagram_url"
-                                       value="{{ settings.instagram_url|default:'' }}"
-                                       placeholder="https://instagram.com/yourpage" required>
-                                <small class="text-muted">Customers will follow this link for verification</small>
+                            <div id="instagramFields" {% if not form.enable_instagram_verification.value %}style="display: none;"{% endif %}>
+                                <div class="mb-3">
+                                    <label for="instagram_url" class="form-label fw-medium">Instagram URL</label>
+                                    <input type="url" class="form-control {% if form.instagram_url.errors %}is-invalid{% endif %}" 
+                                           name="instagram_url" id="instagram_url"
+                                           value="{{ form.instagram_url.value|default:'' }}"
+                                           placeholder="https://instagram.com/yourpage">
+                                    {% if form.instagram_url.errors %}
+                                        <div class="invalid-feedback">
+                                            {% for error in form.instagram_url.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+
+                                <div class="form-check form-switch mb-3">
+                                    <input class="form-check-input" type="checkbox" id="require_instagram_screenshot"
+                                           name="require_instagram_screenshot" {% if form.require_instagram_screenshot.value %}checked{% endif %}>
+                                    <label class="form-check-label fw-medium" for="require_instagram_screenshot">
+                                        Require Screenshot Proof
+                                    </label>
+                                    <small class="d-block text-muted">Customers must upload proof of following</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Google Verification -->
+                        <div class="verification-section mb-3">
+                            <div class="form-check form-switch mb-3">
+                                <input class="form-check-input" type="checkbox" id="enable_google_review"
+                                       name="enable_google_review" {% if form.enable_google_review.value %}checked{% endif %}>
+                                <label class="form-check-label fw-medium" for="enable_google_review">
+                                    Enable Google Review Verification
+                                </label>
+                                <small class="d-block text-muted">Customers must leave a Google review</small>
                             </div>
 
-                            <div class="mb-3">
-                                <label for="google_review_url" class="form-label fw-medium">Google Review URL</label>
-                                <input type="url" class="form-control" name="google_review_url" id="google_review_url"
-                                       value="{{ settings.google_review_url|default:'' }}"
-                                       placeholder="https://g.page/r/Cxyz/review" required>
-                                <small class="text-muted">Customers will be redirected here for reviews</small>
-                            </div> -->
+                            <div id="googleFields" {% if not form.enable_google_review.value %}style="display: none;"{% endif %}>
+                                <div class="mb-3">
+                                    <label for="google_review_url" class="form-label fw-medium">Google Review URL</label>
+                                    <input type="url" class="form-control {% if form.google_review_url.errors %}is-invalid{% endif %}" 
+                                           name="google_review_url" id="google_review_url"
+                                           value="{{ form.google_review_url.value|default:'' }}"
+                                           placeholder="https://g.page/r/Cxyz/review">
+                                    {% if form.google_review_url.errors %}
+                                        <div class="invalid-feedback">
+                                            {% for error in form.google_review_url.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                    <small class="text-muted">Must be a valid Google Maps review URL</small>
+                                </div>
 
-                            <div class="mb-3">
-    <label for="instagram_url" class="form-label fw-medium">Instagram Page URL</label>
-    <input type="url" class="form-control {% if form.instagram_url.errors %}is-invalid{% endif %}" 
-           name="instagram_url" id="instagram_url"
-           value="{{ form.instagram_url.value|default:'' }}"
-           placeholder="https://instagram.com/yourpage">
-    {% if form.instagram_url.errors %}
-        <div class="invalid-feedback">
-            {% for error in form.instagram_url.errors %}
-                {{ error }}
-            {% endfor %}
-        </div>
-    {% endif %}
-    <small class="text-muted">Customers will follow this link for verification</small>
-</div>
-
-<div class="mb-3">
-    <label for="google_review_url" class="form-label fw-medium">Google Review URL</label>
-    <input type="url" class="form-control {% if form.google_review_url.errors %}is-invalid{% endif %}" 
-           name="google_review_url" id="google_review_url"
-           value="{{ form.google_review_url.value|default:'' }}"
-           placeholder="https://g.page/r/Cxyz/review">
-    {% if form.google_review_url.errors %}
-        <div class="invalid-feedback">
-            {% for error in form.google_review_url.errors %}
-                {{ error }}
-            {% endfor %}
-        </div>
-    {% endif %}
-    <small class="text-muted">Customers will be redirected here for reviews</small>
-</div>
+                                <div class="form-check form-switch mb-3">
+                                    <input class="form-check-input" type="checkbox" id="require_google_screenshot"
+                                           name="require_google_screenshot" {% if form.require_google_screenshot.value %}checked{% endif %}>
+                                    <label class="form-check-label fw-medium" for="require_google_screenshot">
+                                        Require Screenshot Proof
+                                    </label>
+                                    <small class="d-block text-muted">Customers must upload proof of review</small>
+                                </div>
+                            </div>
                         </div>
 
                         <!-- Form Actions -->
@@ -264,10 +224,6 @@
                     </form>
                 </div>
             </div>
-
-            <p class="text-center text-muted small mt-3">
-                <i class="fas fa-info-circle me-1"></i> Changes take effect immediately
-            </p>
         </div>
     </div>
 </div>
@@ -276,30 +232,38 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        const socialToggle = document.getElementById('require_social');
-        const socialFields = document.getElementById('socialFields');
-        const urlInputs = socialFields.querySelectorAll('input[type="url"]');
+        // Toggle multiple entries based on bill number requirement
         const billNumberToggle = document.getElementById('require_bill_number');
         const multipleEntriesContainer = document.getElementById('multipleEntriesContainer');
-
-        function toggleSocialFields() {
-            const show = socialToggle.checked;
-            socialFields.style.display = show ? 'block' : 'none';
-            urlInputs.forEach(input => input.required = show);
-        }
-
+        
         function toggleMultipleEntries() {
             multipleEntriesContainer.style.display = billNumberToggle.checked ? 'none' : 'block';
         }
-
-        // Event listeners
-        socialToggle.addEventListener('change', toggleSocialFields);
         billNumberToggle.addEventListener('change', toggleMultipleEntries);
-        
-        // Initial state
-        toggleSocialFields();
         toggleMultipleEntries();
+
+        // Toggle Instagram fields
+        const instagramToggle = document.getElementById('enable_instagram_verification');
+        const instagramFields = document.getElementById('instagramFields');
+        
+        function toggleInstagramFields() {
+            instagramFields.style.display = instagramToggle.checked ? 'block' : 'none';
+            document.getElementById('instagram_url').required = instagramToggle.checked;
+        }
+        instagramToggle.addEventListener('change', toggleInstagramFields);
+        toggleInstagramFields();
+
+        // Toggle Google fields
+        const googleToggle = document.getElementById('enable_google_review');
+        const googleFields = document.getElementById('googleFields');
+        
+        function toggleGoogleFields() {
+            googleFields.style.display = googleToggle.checked ? 'block' : 'none';
+            document.getElementById('google_review_url').required = googleToggle.checked;
+        }
+        googleToggle.addEventListener('change', toggleGoogleFields);
+        toggleGoogleFields();
     });
-    </script>
+</script>
 </body>
 </html>
