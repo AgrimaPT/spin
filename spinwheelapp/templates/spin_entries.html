@@ -155,14 +155,23 @@
 <div class="container mt-4">
     <!-- Header Section -->
     <div class="row mb-4 align-items-center">
-        <div class="col-12 col-md-6 mb-2 mb-md-0">
+        <div class="col-12 col-md-4 mb-2 mb-md-0">
             <h2 class="mb-0"><i class="fas fa-history me-2"></i>Spin Entries</h2>
         </div>
-        <div class="col-12 col-md-6 text-md-end">
+        
+        <div class="col-12 col-md-4 text-md-end">
+            <button id="downloadExcel" class="btn btn-success">
+                <i class="fas fa-file-excel me-1"></i> Download 
+            </button>
+        </div>
+
+        <div class="col-12 col-md-4 text-md-end">
             <a class="btn btn-primary" href="{% url 'offer_list' %}">
                 <i class="fas fa-arrow-left me-1"></i>Back to Offers
             </a>
+            
         </div>
+
     </div>
 
     <div class="mb-3 text-center">
@@ -330,5 +339,21 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 });
 </script>
+<script>
+document.getElementById('downloadExcel').addEventListener('click', function () {
+    // Get the table element
+    var table = document.getElementById("entriesTable");
+
+    // Convert table to worksheet
+    var wb = XLSX.utils.table_to_book(table, {sheet: "Spin Entries"});
+
+    // Export to Excel file
+    XLSX.writeFile(wb, "spin_entries.xlsx");
+});
+</script>
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
 </body>
 </html>

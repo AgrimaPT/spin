@@ -1231,6 +1231,7 @@ def social_verification(request, shop_code):
         return redirect('spin_page')
 
     entry_data = request.session.get('entry_data', {})
+    temp_spin_id = request.session.get('temp_spin_id')
     if not entry_data or 'phone' not in entry_data:
         logger.warning("Session data missing, redirecting to form")
         messages.error(request, "Session expired. Please start over.")
@@ -1262,6 +1263,7 @@ def social_verification(request, shop_code):
             logger.info("Verification saved")
             
             request.session['social_verified'] = True
+            request.session.save()
             request.session.modified = True
             logger.info("Session marked as verified")
             
