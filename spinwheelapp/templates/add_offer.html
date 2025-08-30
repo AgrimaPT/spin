@@ -124,6 +124,20 @@
                            required>
                     <small class="text-muted">This will appear on the wheel segment</small>
                 </div>
+
+
+                <div class="mb-4">
+                    <label for="offerDescription" class="form-label">Description (Optional)</label>
+                    <textarea 
+                        class="form-control" 
+                        id="offerDescription" 
+                        name="description" 
+                        rows="3" 
+                        maxlength="200"
+                        placeholder="Enter offer description (optional)"
+                    ></textarea>
+                    <small class="text-muted">Max 50 characters. This will be shown to customers when they win this offer.</small>
+                </div>
                 
                 <div class="mb-4">
                     <label for="offerColor" class="form-label">Segment Color</label>
@@ -188,6 +202,19 @@
             } else {
                 this.classList.remove('is-invalid');
             }
+        });
+
+        // Character counter for description
+        const descriptionTextarea = document.getElementById('offerDescription');
+        const charCount = document.createElement('small');
+        charCount.className = 'text-muted float-end';
+        charCount.textContent = '0/200 characters';
+        descriptionTextarea.parentNode.appendChild(charCount);
+        
+        descriptionTextarea.addEventListener('input', function() {
+            const length = this.value.length;
+            charCount.textContent = `${length}/200 characters`;
+            charCount.className = `text-muted float-end ${length > 200 ? 'text-danger' : ''}`;
         });
     </script>
 </body>

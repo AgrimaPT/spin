@@ -591,6 +591,43 @@ canvas.confetti-canvas {
     font-size: 1.2rem;
 }
 
+
+
+#winning-offer-description {
+    margin: 15px 0;
+    padding: 12px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    font-size: 1.1rem;
+    line-height: 1.4;
+    text-align: center;
+    max-width: 400px;
+    border-left: 4px solid rgba(255, 255, 255, 0.3);
+    max-height: 120px; /* Limit height */
+    overflow-y: auto; /* Add scroll for long content */
+    word-wrap: break-word; /* Break long words */
+    overflow-wrap: break-word; /* Modern alternative */
+}
+
+/* Scrollbar styling for webkit browsers */
+#winning-offer-description::-webkit-scrollbar {
+    width: 6px;
+}
+
+
+#winning-offer-description::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
+}
+
+#winning-offer-description::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 3px;
+}
+
+#winning-offer-description::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.5);
+}
         @media (max-width: 768px) {
             
             h1 {
@@ -603,6 +640,13 @@ canvas.confetti-canvas {
                 text-align: center;
                 margin-bottom: 2.5rem;
             }
+
+             #winning-offer-description {
+        font-size: 1rem;
+        padding: 10px;
+        margin: 12px 0;
+       
+    }
 
             #wheel-container {
         width: min(80vw, 400px);  /* Slightly larger than 480px breakpoint */
@@ -664,6 +708,13 @@ canvas.confetti-canvas {
                 text-align: center;
                 margin-bottom: 2rem;
             }
+
+            #winning-offer-description {
+        font-size: 0.95rem;
+        padding: 8px;
+        margin: 10px 0;
+        
+    }
 
             #wheel-container {
                 width: min(85vw, 360px);
@@ -761,6 +812,18 @@ canvas.confetti-canvas {
         <div id="modal-content">
             <button class="close-modal" aria-label="Close" id="close-modal-button">×</button>
             🎉 Congratulations! You won: <span id="winning-offer-name"></span>!
+
+            <div id="winning-offer-description" style="
+            margin: 15px 0;
+            padding: 12px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            font-size: 1.1rem;
+            line-height: 1.4;
+            text-align: center;
+            max-width: 400px;
+        "></div>
+
             <div style="margin-top: 30px;">
                 <button id="whatsapp-claim-btn" class="whatsapp-btn">
                     <i class="fab fa-whatsapp"></i> Claim via WhatsApp
@@ -1070,6 +1133,22 @@ function shuffleArray(array) {
 // Initialize first batch
 initializeExactDistribution(segments);
 
+
+function displayWinningOffer(result) {
+    document.getElementById('winning-offer-name').textContent = result.name;
+    
+    // Display description if available
+    const descriptionElement = document.getElementById('winning-offer-description');
+    if (result.description && result.description.trim() !== '') {
+        descriptionElement.textContent = result.description;
+        descriptionElement.style.display = 'block';
+    } else {
+        descriptionElement.style.display = 'none';
+    }
+}
+
+
+
 // ===== SPIN HANDLER ===== //
 spinButton.addEventListener('click', async function() {
   if (isSpinning) return;
@@ -1125,7 +1204,8 @@ spinButton.addEventListener('click', async function() {
 
     // Prepare form submission
     document.getElementById('selected-offer-input').value = selectedOfferId;
-    document.getElementById('winning-offer-name').textContent = result.name;
+    // document.getElementById('winning-offer-name').textContent = result.name;
+    displayWinningOffer(result); // Use the new function
     document.getElementById('modal').style.display = 'flex';
 
     // Play modal sound

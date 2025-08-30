@@ -159,6 +159,7 @@
                 <thead class="table-light">
                     <tr>
                         <th>Offer</th>
+                        <th>Description</th> 
                         <th>Probability</th>
                         <th>Actions</th>
                     </tr>
@@ -169,6 +170,13 @@
                         <td>
                             <span class="offer-color" style="background-color:{{ offer.color }}"></span>
                             <strong>{{ offer.name }}</strong>
+                        </td>
+                        <td> 
+                            {% if offer.description %}
+                                <span class="text-muted small">{{ offer.description|truncatewords:10 }}</span>
+                            {% else %}
+                                <span class="text-muted small">-</span>
+                            {% endif %}
                         </td>
                         <td>
                             <span class="percentage-badge">{{ offer.percentage }}%</span>

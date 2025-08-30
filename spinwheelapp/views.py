@@ -151,14 +151,18 @@ def offer_list(request):
             shop_name=default_name,
             shop_code=shop_code
         )
+
     offers = Offer.objects.filter(shop=shop)
-    return render(request, 'offer_list.html', {'offers': offers})
+    total_percentage = sum(offer.percentage for offer in offers)
+    
+    return render(request, 'offer_list.html', {'offers': offers, 'total_percentage': total_percentage })
 
 
 @login_required
 def add_offer(request):
     if request.method == 'POST':
         name = request.POST.get('name')
+        description = request.POST.get('description', '').strip()
         color = request.POST.get('color')
         percentage = float(request.POST.get('percentage', 0))
         shop = request.user.shopprofile
@@ -170,7 +174,7 @@ def add_offer(request):
         if simulated_total > 100.0:
             messages.error(request, f"Total percentage would exceed 100% (current total: {current_total}%)")
         else:
-            Offer.objects.create(shop=shop, name=name, color=color, percentage=percentage)
+            Offer.objects.create(shop=shop, name=name,description=description if description else None, color=color, percentage=percentage)
             return redirect('offer_list')
 
     return render(request, 'add_offer.html')
@@ -316,6 +320,7 @@ def spin_page(request):
             segments.append({
                 'id': str(offer.id),
                 'name': offer.name,
+                'description': offer.description or '',
                 'color': offer.color,
                 'percentage': float(offer.percentage),
                 'text_angle': float(i * angle_per_segment + (angle_per_segment / 2)),
@@ -380,6 +385,7 @@ def edit_offer(request, offer_id):
             })
         
         offer.name = request.POST.get('name')
+        offer.description = request.POST.get('description', '').strip() or None 
         offer.color = request.POST.get('color')
         offer.percentage = new_percentage
         offer.save()

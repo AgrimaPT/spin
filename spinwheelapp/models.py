@@ -38,6 +38,12 @@ class ShopProfile(models.Model):
 class Offer(models.Model):
     shop = models.ForeignKey(ShopProfile, on_delete=models.CASCADE)
     name = models.CharField(max_length=15)
+    description = models.TextField(
+        max_length=50, 
+        blank=True, 
+        null=True,
+        help_text="Optional description for the offer (max 50 characters)"
+    )
     color = models.CharField(max_length=7, default="#ffffff")
     percentage = models.FloatField(help_text="Probability percentage (e.g., 25.0)")
     def __str__(self):
