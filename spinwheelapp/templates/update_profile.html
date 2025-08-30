@@ -104,10 +104,64 @@
             margin-bottom: 1.5rem;
         }
         
+        .qr-container {
+            text-align: center;
+            margin: 1.5rem 0;
+            padding: 1rem;
+            border: 1px solid #e3e6f0;
+            border-radius: 0.35rem;
+            background-color: #f8f9fc;
+        }
+        
+        .qr-container img {
+            max-width: 200px;
+            border: 1px solid #ddd;
+            padding: 10px;
+            background: white;
+            margin-bottom: 1rem;
+        }
+        
+        .download-btn {
+            margin-top: 10px;
+        }
+        
+        .btn-success {
+            background-color: #1cc88a;
+            border-color: #1cc88a;
+        }
+        
+        .btn-success:hover {
+            background-color: #17a673;
+            border-color: #169b6b;
+        }
+        
         @media (max-width: 576px) {
             .profile-body {
                 padding: 1.5rem;
             }
+        }
+        
+        .whatsapp-input-group {
+            display: flex;
+            align-items: center;
+        }
+        
+        .whatsapp-prefix {
+            background-color: #f8f9fc;
+            padding: 0.75rem 0.5rem;
+            border: 1px solid #d1d3e2;
+            border-right: none;
+            border-radius: 0.35rem 0 0 0.35rem;
+            font-weight: 600;
+        }
+        
+        .whatsapp-number-input {
+            border-radius: 0 0.35rem 0.35rem 0;
+            flex-grow: 1;
+        }
+        
+        .hidden-country-code {
+            display: none;
         }
     </style>
 </head>
@@ -133,15 +187,23 @@
                         
                         <div class="shop-code-display">
                             <i class="fas fa-qrcode me-2"></i>Shop Code: {{ form.instance.shop_code }}
-
-                            <p>Customers can scan this to access your spin wheel:</p>
-<img src="{{ qr_code_url }}" alt="QR Code for {{ shop.shop_name }}">
-<p>Direct URL: <a href="{{ qr_url }}" target="_blank">{{ qr_url }}</a></p>
-
-<p><small>Print this QR code or share the URL with your customers</small></p>
                         </div>
                         
-                        <form method="post">
+                        <div class="qr-container">
+                            <p>Customers can scan this to access your spin wheel:</p>
+                            <img src="{{ qr_code_url }}" alt="QR Code for {{ shop.shop_name }}" id="qrCodeImage">
+                            
+                            <div class="download-btn">
+                                <button class="btn btn-success" id="downloadQrBtn">
+                                    <i class="fas fa-download me-2"></i>Download QR Code
+                                </button>
+                            </div>
+                            
+                            <p class="mt-3">Direct URL: <a href="{{ qr_url }}" target="_blank">{{ qr_url }}</a></p>
+                            <p><small>Print this QR code or share the URL with your customers</small></p>
+                        </div>
+                        
+                        <form method="post" id="profileForm">
                             {% csrf_token %}
                             
                             <div class="form-group">
@@ -157,12 +219,17 @@
                                 {% endif %}
                             </div>
 
-                            <!-- Add this after the shop_name field -->
+                            <!-- WhatsApp Number Field - Fixed -->
                             <div class="form-group">
                                 <label for="id_whatsapp_number">WhatsApp Number</label>
-                                <input type="text" class="form-control" id="id_whatsapp_number" name="whatsapp_number" 
-                                    value="{{ form.whatsapp_number.value}}" required
-                                    pattern="[0-9]{10}" title="10 digit number without country code">
+                                <div class="whatsapp-input-group">
+                                    <span class="whatsapp-prefix">+91</span>
+                                    <input type="text" class="form-control whatsapp-number-input" id="id_whatsapp_number_display" 
+                                           pattern="[6-9][0-9]{9}" title="10-digit Indian mobile number" required
+                                           placeholder="9876543210" maxlength="10">
+                                    <!-- Hidden field that will actually be submitted -->
+                                    <input type="hidden" id="id_whatsapp_number" name="whatsapp_number" value="{{ form.whatsapp_number.value|default:'' }}">
+                                </div>
                                 {% if form.whatsapp_number.errors %}
                                     <ul class="errorlist">
                                         {% for error in form.whatsapp_number.errors %}
@@ -170,10 +237,8 @@
                                         {% endfor %}
                                     </ul>
                                 {% endif %}
-                                <small class="text-muted">10-digit WhatsApp number customers can contact you at</small>
+                                <small class="text-muted">10-digit WhatsApp number customers can contact you at (will be stored with country code)</small>
                             </div>
-                            
-                            <!-- Add any additional fields here if needed -->
                             
                             <div class="d-flex justify-content-between mt-4">
                                 <button type="submit" class="btn btn-primary">
@@ -194,5 +259,102 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <!-- Font Awesome -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+    
+    <script>
+        document.getElementById('downloadQrBtn').addEventListener('click', function() {
+            // Get the QR code image element
+            const qrCodeImage = document.getElementById('qrCodeImage');
+            const imageUrl = qrCodeImage.src;
+            
+            // Create a canvas element to draw the image
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            const img = new Image();
+            
+            // Set crossOrigin to anonymous to avoid tainted canvas issues
+            img.crossOrigin = 'Anonymous';
+            
+            img.onload = function() {
+                // Set canvas dimensions to match the image
+                canvas.width = img.width;
+                canvas.height = img.height;
+                
+                // Draw the image on the canvas
+                ctx.drawImage(img, 0, 0);
+                
+                // Create a temporary anchor element
+                const downloadLink = document.createElement('a');
+                
+                // Set the href to the canvas data URL
+                downloadLink.href = canvas.toDataURL('image/png');
+                
+                // Set the download filename
+                const shopName = "{{ form.shop_name.value|default:'shop' }}".replace(/\s+/g, '_').toLowerCase();
+                downloadLink.download = `${shopName}_qrcode.png`;
+                
+                // Trigger the download
+                document.body.appendChild(downloadLink);
+                downloadLink.click();
+                document.body.removeChild(downloadLink);
+            };
+            
+            // Handle image loading errors
+            img.onerror = function() {
+                // Fallback method if canvas method fails
+                fallbackDownload(imageUrl);
+            };
+            
+            // Load the image
+            img.src = imageUrl;
+        });
+        
+        // Fallback method for downloading
+        function fallbackDownload(imageUrl) {
+            const downloadLink = document.createElement('a');
+            downloadLink.href = imageUrl;
+            
+            // Set the download filename
+            const shopName = "{{ form.shop_name.value|default:'shop' }}".replace(/\s+/g, '_').toLowerCase();
+            downloadLink.download = `${shopName}_qrcode.png`;
+            
+            // Trigger the download
+            document.body.appendChild(downloadLink);
+            downloadLink.click();
+            document.body.removeChild(downloadLink);
+        }
+        
+        // Format WhatsApp number for display and submission
+        document.addEventListener('DOMContentLoaded', function() {
+            const displayInput = document.getElementById('id_whatsapp_number_display');
+            const hiddenInput = document.getElementById('id_whatsapp_number');
+            const form = document.getElementById('profileForm');
+            const currentValue = hiddenInput.value;
+            
+            // If the value starts with 91 (country code), remove it for display
+            if (currentValue.startsWith('91') && currentValue.length === 12) {
+                displayInput.value = currentValue.substring(2);
+            } else if (currentValue.length === 10) {
+                // If it's already a 10-digit number, use it directly
+                displayInput.value = currentValue;
+            }
+            
+            // Before form submission, add the country code to the hidden field
+            form.addEventListener('submit', function(e) {
+                const displayValue = displayInput.value.trim();
+                
+                // Validate the input
+                const phoneRegex = /^[6-9]\d{9}$/;
+                if (!phoneRegex.test(displayValue)) {
+                    e.preventDefault();
+                    alert('Please enter a valid 10-digit Indian mobile number');
+                    displayInput.focus();
+                    return;
+                }
+                
+                // Add country code and update hidden field
+                hiddenInput.value = '91' + displayValue;
+            });
+        });
+    </script>
 </body>
 </html>
